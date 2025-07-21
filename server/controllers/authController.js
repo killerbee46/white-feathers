@@ -4,11 +4,12 @@ import userModel from "../models/userModel.js";
 
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
+import { verifyOtp } from "./otpController.js";
 
 export const registerController = async (req, res) => {
   try {
     const { otp, data } = req?.body;
-    const { name, email, password, phone, address } = data;
+    const { email, phone } = data;
     const exisitingUser = await userModel.findOne({ email });
     const exisitingPhone = await userModel.findOne({ phone });
 
@@ -42,14 +43,13 @@ export const registerController = async (req, res) => {
         role: 1,
         otp:otp
       }).save();
-
       return res.status(201).send({
         success: true,
         message: "User Register Successfully",
       });
     }
     else {
-      return res.status(201).json({
+      return res.status(409).json({
         status: 'failed',
         message: "Otp did not Match"
       })
@@ -71,44 +71,46 @@ export const loginController = async (req, res) => {
     const { email, password } = req.body;
     //validation
     if (!email || !password) {
-      return res.status(400).send({
+      return res.status(409).send({
         success: false,
         message: "Invalid email or password",
       });
     }
     //check user
-    const user = await userModel.findOne({ email });
+    const user = await userModel.findOne({ email }, "name password address phone otp");
     if (!user) {
-      return res.status(404).send({
+      return res.status(409).send({
         success: false,
         message: "Email is not registerd",
       });
     }
+
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(401).send({
+      return res.status(409).send({
         success: false,
         message: "Invalid Password",
       });
     }
     //token
-    const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '7d'
     });
-    res.status(200).send({
-      success: true,
-      message: "login successfully",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        address: user.address,
-        image: user.image,
-        role: user.role,
-      },
-      token,
-    });
+
+    if (!user.otp) {
+      req.body = {
+        ...req.body,
+        phone: user?.phone
+      }
+      verifyOtp(req, res)
+    }
+    else {
+      return res.status(201).send({
+        success: true,
+        message: "Logged in successfully",
+        token,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -119,35 +121,92 @@ export const loginController = async (req, res) => {
   }
 };
 
+export const unverifiedLoginController = async (req, res) => {
+  try {
+    const { otp, data } = req?.body;
+    const { phone, email } = data;
+    const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
+    const user = await userModel.findOne({ email }, "")
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '7d'
+    });
+    const expired = (dayjs() - dayjs(otpData.otp_expiry)) > 0
+    if (expired) {
+      return res.status(400).send({
+        status: 'failed',
+        message: "OTP has expired. Please renew OTP.",
+      });
+    }
+
+    const otpMatch = otpData.otp == otp;
+
+    if (otpMatch) {
+      await userModel.findByIdAndUpdate(
+        user?._id,
+        {
+          otp: otp
+        })
+      return res.status(201).json({
+        status: "success",
+        message: "Logged in successfully",
+        token
+      });
+    }
+    else {
+      return res.status(409).json({
+        status: 'failed',
+        message: "Otp did not Match"
+      })
+    }
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error while Logging in",
+      error,
+    });
+  }
+};
+
 //forgotPasswordController
 
 export const forgotPasswordController = async (req, res) => {
   try {
-    const { email, answer, newPassword } = req.body;
-    if (!email) {
-      res.status(400).send({ message: "Emai is required" });
-    }
-    if (!answer) {
-      res.status(400).send({ message: "answer is required" });
-    }
-    if (!newPassword) {
-      res.status(400).send({ message: "New Password is required" });
-    }
-    //check
-    const user = await userModel.findOne({ email, answer });
-    //validation
-    if (!user) {
-      return res.status(404).send({
-        success: false,
-        message: "Wrong Email Or Answer",
+     const { otp, password, data } = req?.body;
+    const { phone } = data;
+    const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
+    const user = await userModel.findOne({ phone }, "")
+    const expired = (dayjs() - dayjs(otpData.otp_expiry)) > 0
+
+    if (expired) {
+      return res.status(400).send({
+        status: 'failed',
+        message: "OTP has expired. Please renew OTP.",
       });
     }
-    const hashed = await hashPassword(newPassword);
+
+    const otpMatch = otpData.otp == otp;
+
+    if (otpMatch) {
+      const hashed = await hashPassword(password);
     await userModel.findByIdAndUpdate(user._id, { password: hashed });
     res.status(200).send({
       success: true,
       message: "Password Reset Successfully",
     });
+      return res.status(201).json({
+        status: "success",
+        message: "Logged in successfully",
+      });
+    }
+    else {
+      return res.status(409).json({
+        status: 'failed',
+        message: "Otp did not Match"
+      })
+    }
+    
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -171,7 +230,7 @@ export const testController = (req, res) => {
 //update prfole
 export const updateProfileController = async (req, res) => {
   try {
-    const { name, email, password, address, phone } = req.body;
+    const { name, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
     //password
     if (password && password.length < 6) {

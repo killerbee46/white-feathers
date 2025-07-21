@@ -1,7 +1,7 @@
 {
-  "name": "futsalsonline",
+  "name": "white_feathers_project",
   "version": "1.0.0",
-  "description": "online futsal booking system",
+  "description": "ecommerce site for white feathers jewellery",
   "main": "index.js",
   "scripts": {
     "setup": "cd client && yarn && cd ../server && yarn",

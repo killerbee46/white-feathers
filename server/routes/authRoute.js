@@ -5,9 +5,10 @@ import {
   testController,
   forgotPasswordController,
   updateProfileController,
+  unverifiedLoginController,
 } from "../controllers/authController.js";
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
-import { createOtp } from "../controllers/otpController.js";
+import { changePasswordOtp, createOtp } from "../controllers/otpController.js";
 
 //router object
 const router = express.Router();
@@ -22,11 +23,17 @@ router.post("/register", registerController);
 //LOGIN || POST
 router.post("/login", loginController);
 
+//Verify and LOGIN || POST
+router.post("/verify-login", unverifiedLoginController);
+
+//Verify user || POST
+router.post("/verify-user", changePasswordOtp);
+
 //Forgot Password || POST
 router.post("/forgot-password", forgotPasswordController);
 
 //test routes
-router.get("/test", requireSignIn, isAdmin, testController);
+router.get("/test", requireSignIn, testController);
 
 //protected User route auth
 router.get("/user-auth", requireSignIn, (req, res) => {

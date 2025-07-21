@@ -44,7 +44,7 @@ export const createOtp = async (req, res) => {
 
         const otpExists = await OTP.findOne({ phone })
         const otp = generateOTP()
-        const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
+        const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
 
         if (otpExists) {
             await fetch(sparrowUrl)
@@ -53,7 +53,7 @@ export const createOtp = async (req, res) => {
                 {
                     phone: phone,
                     otp: otp,
-                    otp_expiry: dayjs().add(1, 'minute')
+                    otp_expiry: dayjs().add(5, 'minutes')
                 },
                 { new: true }
             );
@@ -72,7 +72,7 @@ export const createOtp = async (req, res) => {
             const token = await new OTP({
                 phone: phone,
                 otp: otp,
-                otp_expiry: dayjs().add(1, 'minute')
+                otp_expiry: dayjs().add(5, 'minutes')
             }).save();
 
             res.status(201).json({
@@ -89,6 +89,126 @@ export const createOtp = async (req, res) => {
             success: false,
             error,
             message: "Error While Registering",
+        });
+    }
+};
+
+export const verifyOtp = async (req, res) => {
+    try {
+        const { email, password, phone } = req?.body;
+        //validations
+        if (!email) {
+            return res.send({ error: "Email is Required" });
+        }
+        if (!password) {
+            return res.send({ error: "Password is Required" });
+        }
+
+        const otpExists = await OTP.findOne({ phone })
+        const otp = generateOTP()
+        const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
+
+        if (otpExists) {
+            await fetch(sparrowUrl)
+            const newToken = await OTP.findByIdAndUpdate(
+                otpExists?._id,
+                {
+                    phone: phone,
+                    otp: otp,
+                    otp_expiry: dayjs().add(5, 'minutes')
+                },
+                { new: true }
+            );
+
+            res.status(201).json({
+                message: "OTP sent to your phone please verify to proceed further",
+                otp_expiry: newToken.otp_expiry,
+                data: {
+                    ...req?.body
+                }
+            })
+        }
+        else {
+            await fetch(sparrowUrl)
+            const token = await new OTP({
+                phone: phone,
+                otp: otp,
+                otp_expiry: dayjs().add(5, 'minutes')
+            }).save();
+
+            res.status(201).json({
+                message: "OTP sent to your phone please verify to proceed further",
+                otp_expiry: token?.otp_expiry,
+                data: {
+                    ...req?.body
+                }
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            error,
+            message: "Error While Logging in",
+        });
+    }
+};
+
+export const changePasswordOtp = async (req, res) => {
+    try {
+        const { phone } = req?.body;
+        //validations
+        if (!phone) {
+            return res.send({ error: "Phone is Required" });
+        }
+
+        
+        const otpExists = await OTP.findOne({ phone })
+        const otp = generateOTP()
+        const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
+        
+        if (otpExists) {
+            await fetch(sparrowUrl)
+            const newToken = await OTP.findByIdAndUpdate(
+                otpExists?._id,
+                {
+                    phone: phone,
+                    otp: otp,
+                    otp_expiry: dayjs().add(5, 'minutes')
+                },
+                { new: true }
+            );
+            
+            return res.status(201).json({
+                message: "OTP sent to your phone please verify to proceed further",
+                otp_expiry: newToken.otp_expiry,
+                data: {
+                    ...req?.body
+                }
+            })
+        }
+        else {
+            await fetch(sparrowUrl)
+            const token = await new OTP({
+                phone: phone,
+                otp: otp,
+                otp_expiry: dayjs().add(5, 'minutes')
+            }).save();
+
+            res.status(201).json({
+                message: "OTP sent to your phone please verify to proceed further",
+                otp_expiry: token?.otp_expiry,
+                data: {
+                    ...req?.body
+                }
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            error,
+            message: "Error While Logging in",
         });
     }
 };
