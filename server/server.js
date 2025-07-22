@@ -13,6 +13,7 @@ import profileRoutes from "./routes/profileRoutes.js";
 import sqlRoutes from "./routes/sqlRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import testProductRoutes from "./routes/testProductRoutes.js";
 import cors from "cors";
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
@@ -20,6 +21,7 @@ import path from "path";
 import swaggerJSDoc from 'swagger-jsdoc';
 import { tempDbConnect } from "./config/tempDb.js";
 import mongoose from "mongoose";
+import { calculatePrice } from "./controllers/priceCalculatorController.js";
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename);
 
@@ -73,6 +75,7 @@ app.use("/api/sql", sqlRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/upload", uploadRoutes)
+app.post("/api/price-calculator", calculatePrice)
 
 //PORT
 const PORT = process.env.PORT || 8080;

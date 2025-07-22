@@ -191,14 +191,10 @@ export const forgotPasswordController = async (req, res) => {
     if (otpMatch) {
       const hashed = await hashPassword(password);
     await userModel.findByIdAndUpdate(user._id, { password: hashed });
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "Password Reset Successfully",
     });
-      return res.status(201).json({
-        status: "success",
-        message: "Logged in successfully",
-      });
     }
     else {
       return res.status(409).json({

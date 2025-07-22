@@ -1,6 +1,6 @@
 export const sqlFilterHandler = (filters) => {
     let query = "";
-    if (filters.name) query = query + ` and name like %%${filters?.name}%% `;
+    if (filters.name) query = query + ` and p_name like '%${filters?.name}%' `;
     if (filters.status) query = query + ` and status = ${filters?.status} `;
     // if (filters.category) query = query + ` and cat_id = ${filters?.category} `;
     if (filters.limit) query = query + ` limit ${filters?.limit} `;

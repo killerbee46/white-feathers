@@ -78,9 +78,7 @@ export const getProducts = async (req, res) => {
 export const getProduct = async (req, res) => {
   try {
     const product = await Product
-      .findOne({ slug: req.params.slug })
-      .select("-photo")
-      .populate("category");
+      .findById(req?.params?.id)
     res.status(200).send({
       success: true,
       message: "Single Product Fetched",
