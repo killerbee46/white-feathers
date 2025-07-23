@@ -18,11 +18,11 @@ export const getProducts = async (req, res) => {
       existingWishlist = wishlist?.products?.map((w)=> w?.id_pack)
       existingCart = cart?.products?.map((c)=> c?.id_pack)
     }
-        const wishListCheck = existingWishlist.length !== 0 ? ` ,IF(p.id_pack in (${ existingWishlist?.join(",")}), true, false) as wishlist ` : ""
+    const wishListCheck = existingWishlist.length !== 0 ? ` ,IF(p.id_pack in (${ existingWishlist?.join(",")}), true, false) as wishlist ` : ""
     const cartCheck = existingCart.length !== 0 ? ` ,IF(p.id_pack in (${ existingCart?.join(",")}), true, false) as cart ` : ""
 
     const categories = req?.query?.category
-    const categoryFilter = categories && categories.length !== 0 && " and cat_id = " + categories.join(" or cat_id = ")
+    const categoryFilter = (categories && categories.length !== 0) ? " and cat_id = " + categories.join(" or cat_id = ") : ""
     const query = sqlProductFetch("p.p_name as title"+wishListCheck+cartCheck) + categoryFilter + sqlFilterHandler(req?.query)
     const [data] = await sequelize.query(query)
 
