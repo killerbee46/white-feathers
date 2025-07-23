@@ -12,6 +12,8 @@ export const sqlFilterHandler = (filters) => {
     if (filters.maxPrice) query = query + ` and ${dynamic_price} < ${filters?.maxPrice} `;
     if (filters.minWeight) query = query + ` and weight > ${filters?.minWeight} `;
     if (filters.maxWeight) query = query + ` and weight < ${filters?.maxWeight} `;
+    if (filters.metal === "gold") query = query + ` and p.pmt_id >= 1 `;
+    if (filters.metal === "silver") query = query + ` and p.pmt_id >= 10 `;
     if (filters.limit) query = query + ` limit ${filters?.limit} `;
     if (filters.offset) query = query + ` offset ${filters?.offset} `;
 
