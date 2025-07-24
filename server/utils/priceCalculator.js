@@ -10,12 +10,12 @@ export const priceCalculator = (data) => {
       // gold silver
       if (d?.unit === "gm" || d?.unit === "tola") {
         pricePerGram = (d?.unit === "gm") ?
-          d?.metalId?.unitPrice / 11.664 / 11.664 :
+          d?.metalId?.unitPrice / 11.664 :
           d?.metalId?.unitPrice
 
-        makingChargePerGram = (d?.makingCharge && d?.makingCharge <= 0) ? ((d?.makingUnit === "gm") ?
+        makingChargePerGram = (d?.makingUnit === "gm") ?
           d?.makingCharge : (d?.makingUnit === "percent") ?
-            ((d?.materialId?.unitPrice / 11.664) * (d?.makingCharge / 100)) : 0) : 0
+            ((d?.materialId?.unitPrice / 11.664) * (d?.makingCharge / 100)) : 0
       }
       else {
         pricePerGram = (d?.unit === "carat") ?
