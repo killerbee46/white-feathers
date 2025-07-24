@@ -1,5 +1,6 @@
 import { sequelize } from "../config/tempDb.js";
 import Wishlist from "../models/Wishlist.js";
+import { sqlProductFetch } from "../utils/sqlProductFetch.js";
 
 export const getWishlist = async (req, res) => {
     try {
@@ -29,7 +30,7 @@ export const addWishlist = async (req, res) => {
         req.body.userId = userId
         let list = []
 
-        const query = `Select * from package where id_pack = ${productId} `
+        const query = sqlProductFetch("p.p_name as title,")+` and p.id_pack = ${productId} `
         const [data] = await sequelize.query(query)
         //validations
         if (!productId) {
@@ -38,7 +39,7 @@ export const addWishlist = async (req, res) => {
 
         if (wishlist) {
             list = wishlist?.products
-            const existingIds = wishlist.products?.map((p)=> p.id_pack )
+            const existingIds = wishlist.products?.map((p)=> p.id )
             if (existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
@@ -91,7 +92,7 @@ export const removeWishlist = async (req, res) => {
 
             const newList = list?.filter((f)=> f.id_pack != productId)
 
-            const existingIds = wishlist.products?.map((p)=> p.id_pack )
+            const existingIds = wishlist.products?.map((p)=> p.id )
             if (!existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',

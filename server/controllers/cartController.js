@@ -1,14 +1,27 @@
 import { sequelize } from "../config/tempDb.js";
 import Cart from "../models/Cart.js";
+import { sqlProductFetch } from "../utils/sqlProductFetch.js";
 
 export const getCart = async (req, res) => {
     try {
         const userId = req?.user?._id
         const cart = await Cart.findOne({ userId: userId }, 'products')
+        let finalPrice = 0
+        let discount = 0
+        cart?.products?.map((p)=> {
+            finalPrice += (p?.dynamic_price * p?.quantity)
+            discount += (p?.discount * p?.quantity)
+        })
         return res.status(200).json({
             status: 'success',
             message: "Cart fetched successfully",
-            data: cart?.products || []
+            data: {
+                products:cart?.products,
+                totalPrice:(finalPrice+discount).toFixed(2),
+                discount:discount.toFixed(2),
+                finalPrice:finalPrice.toFixed(2)
+            },
+
         })
     } catch (error) {
         console.log(error);
@@ -29,7 +42,7 @@ export const addCart = async (req, res) => {
         req.body.userId = userId
         let list = []
 
-        const query = `Select * from package where id_pack = ${productId} `
+        const query = sqlProductFetch("p.p_name as title,")+` and p.id_pack = ${productId} `
         const [data] = await sequelize.query(query)
         //validations
         if (!productId) {
@@ -38,7 +51,7 @@ export const addCart = async (req, res) => {
 
         if (cart) {
             list = cart?.products
-            const existingIds = cart.products?.map((p)=> p?.id_pack )
+            const existingIds = cart.products?.map((p)=> p?.id )
             if (existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
@@ -139,7 +152,7 @@ export const removeCart = async (req, res) => {
 
             const newList = list?.filter((f)=> f.id_pack != productId)
 
-            const existingIds = cart.products?.map((p)=> p.id_pack )
+            const existingIds = cart.products?.map((p)=> p.id )
             if (!existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
