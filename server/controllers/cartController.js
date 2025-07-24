@@ -147,7 +147,7 @@ export const removeCart = async (req, res) => {
                 })
             }
             // list.push(productId)
-            const wish = await Cart.findByIdAndUpdate(Cart?._id, {
+            const wish = await Cart.findByIdAndUpdate(cart?._id, {
                 products:newList
             })
             return res.status(201).json({
