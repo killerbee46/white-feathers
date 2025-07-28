@@ -104,7 +104,7 @@ export const updateCart = async (req, res) => {
             list = cart?.products
 
             const updatedList = list.map((l) => {
-                if (l.id_pack == productId) {
+                if (l.id == productId) {
                     return { ...l, quantity: quantity };
                 } else {
                     return l;
@@ -150,7 +150,7 @@ export const removeCart = async (req, res) => {
         if (cart) {
             list = cart?.products
 
-            const newList = list?.filter((f)=> f.id_pack != productId)
+            const newList = list?.filter((f)=> f.id != productId)
 
             const existingIds = cart.products?.map((p)=> p.id )
             if (!existingIds.includes(parseInt(productId))) {

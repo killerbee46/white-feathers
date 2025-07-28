@@ -90,7 +90,7 @@ export const removeWishlist = async (req, res) => {
         if (wishlist) {
             list = wishlist?.products
 
-            const newList = list?.filter((f)=> f.id_pack != productId)
+            const newList = list?.filter((f)=> f.id != productId)
 
             const existingIds = wishlist.products?.map((p)=> p.id )
             if (!existingIds.includes(parseInt(productId))) {

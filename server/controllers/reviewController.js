@@ -2,15 +2,15 @@ import Review from "../models/Review.js";
 
 export const getTestimonials = async (req, res) => {
     try {
-        const testimonials = await Review.find({ type: "testimonial" }, "userId rating review created_at type")
+        const testimonials = await Review.find({ type: "testimonial" })?.populate("userId")
         const userId = req?.user?._id
-        let allowActions = true
+        let allowActions = false
         const newTestimonial = testimonials.map((test) => {
             if (userId) {
-                allowActions = test.userId !== userId
+                allowActions = test.userId._id == userId
             }
             return {
-                ...test._doc,
+                ...test?._doc,
                 allowActions: allowActions
             }
         })
@@ -30,13 +30,45 @@ export const getTestimonials = async (req, res) => {
     }
 };
 
+export const getProductReview = async (req, res) => {
+    try {
+        const { productId } = req?.params
+        const testimonials = await Review.find({ type: "product", productId: productId }).populate('userId')
+        const userId = req?.user?._id
+        let allowActions = true
+        const newTestimonial = testimonials.map((test) => {
+            if (userId) {
+                allowActions = test.userId !== userId
+            }
+            return {
+                ...test?._doc,
+                allowActions: allowActions
+            }
+        })
+
+        return res.status(200).json({
+            status: 'success',
+            message: "Product reviews fetched successfully",
+            data: newTestimonial
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            error,
+            message: "Error while fetching product review",
+        });
+    }
+};
+
 
 export const addReview = async (req, res) => {
     try {
         const { rating, review, productId } = req.body
         const userId = req?.user?._id
         req.body.userId = userId
-        const myReview = await Review.findOne({ userId: userId, type: productId ? "product" : "testimonial" }, "")
+        const reviewFilter = productId ? { type: "product", productId: productId } : { type: "testimonial" }
+        const myReview = await Review.findOne({ userId: userId, ...reviewFilter }, "")
         //validations
         if (!rating && !review) {
             return res.status(400).send({ error: "Both rating and review are required" });
@@ -46,14 +78,12 @@ export const addReview = async (req, res) => {
         }
         if (productId) {
             req.body.type = "product"
-            req.body.productId = "productId"
+            req.body.productId = productId
         } else {
             req.body.type = "testimonial"
         }
 
-        const newReview = new Review({
-            ...req?.body
-        }).save()
+        const newReview = await new Review(req?.body).save()
         return res.status(201).json({
             status: 'success',
             message: "Review added successfully!",
@@ -70,42 +100,29 @@ export const addReview = async (req, res) => {
 
 export const updateReview = async (req, res) => {
     try {
-        const { productId } = req.params;
-        const { quantity } = req?.body
+        const { id } = req.params;
+        const { rating, review } = req?.body
         const userId = req?.user?._id
-        const cart = await Review.findOne({ userId: userId })
-        req.body.userId = userId
-        let list = []
+         const myReview = await Review.findById(id, "")
+
         //validations
-        if (!productId) {
-            return res.send({ error: "Please select a product to remove" });
+        if (!myReview) {
+            return res.send({ error: "You have no review" });
         }
-
-        if (cart) {
-            list = cart?.products
-
-            const updatedList = list.map((l) => {
-                if (l.id_pack == productId) {
-                    return { ...l, quantity: quantity };
-                } else {
-                    return l;
-                }
-            });
-
-            // list.push(productId)
-            const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                products: updatedList
-            })
-            return res.status(201).json({
-                status: 'success',
-                message: "Updated product in Cart"
-            })
-        } else {
-            return res.status(400).json({
-                status: 'failed',
-                message: "No product in the Cart",
-            })
+        if (!rating && !review) {
+            return res.status(400).send({ error: "Both rating and review are required" });
         }
+        if (userId !== myReview.userId.toString()) {
+            return res.send({ error: "You have no permission to edit this review" });
+        }
+        const deleted = await Review.findByIdAndUpdate(id,{
+            ...req.body
+        })
+        return res.status(201).json({
+            status: "success",
+            message: "Review updated successfully."
+        })
+
     } catch (error) {
         console.log(error);
         res.status(500).send({
@@ -118,42 +135,22 @@ export const updateReview = async (req, res) => {
 
 export const removeReview = async (req, res) => {
     try {
-        const { productId } = req.params;
+        const { id } = req.params;
         const userId = req?.user?._id
-        const cart = await Cart.findOne({ userId: userId })
-        req.body.userId = userId
-        let list = []
+        const myReview = await Review.findById(id, "")
+
         //validations
-        if (!productId) {
-            return res.send({ error: "Please select a product to remove" });
+        if (!myReview) {
+            return res.send({ error: "You have no review" });
         }
-
-        if (cart) {
-            list = cart?.products
-
-            const newList = list?.filter((f) => f.id_pack != productId)
-
-            const existingIds = cart.products?.map((p) => p.id_pack)
-            if (!existingIds.includes(parseInt(productId))) {
-                return res.status(409).json({
-                    status: 'failed',
-                    message: 'Product is not in the Cart'
-                })
-            }
-            // list.push(productId)
-            const wish = await Cart.findByIdAndUpdate(Cart?._id, {
-                products: newList
-            })
-            return res.status(201).json({
-                status: 'success',
-                message: "Removed from Cart"
-            })
-        } else {
-            return res.status(400).json({
-                status: 'failed',
-                message: "No product in the Cart",
-            })
+        if (userId !== myReview.userId.toString()) {
+            return res.send({ error: "You have no permission to delete this review" });
         }
+        const deleted = await Review.deleteOne({ _id: id })
+        return res.status(201).json({
+            status: "success",
+            message: "Review deleted successfully."
+        })
     } catch (error) {
         console.log(error);
         res.status(500).send({

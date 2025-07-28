@@ -15,8 +15,8 @@ export const getProducts = async (req, res) => {
   
       const wishlist = await Wishlist.findOne({userId:userId},"products")
       const cart = await Cart.findOne({userId:userId},"products")
-      existingWishlist = wishlist?.products?.map((w)=> w?.id_pack)
-      existingCart = cart?.products?.map((c)=> c?.id_pack)
+      existingWishlist = wishlist ? wishlist?.products?.map((w)=> w?.id) : []
+      existingCart = cart ? cart?.products?.map((c)=> c?.id) : []
     }
     const wishListCheck = existingWishlist.length !== 0 ? ` IF(p.id_pack in (${ existingWishlist?.join(",")}), true, false) as wishlist, ` : ""
     const cartCheck = existingCart.length !== 0 ? ` IF(p.id_pack in (${ existingCart?.join(",")}), true, false) as cart, ` : ""
@@ -28,7 +28,7 @@ export const getProducts = async (req, res) => {
 
     res.status(200).json({
       status: 'success',
-      data: data
+      data: data,
     })
   } catch (error) {
     console.log(error);
@@ -50,8 +50,8 @@ export const getProduct = async (req, res) => {
   
       const wishlist = await Wishlist.findOne({userId:userId},"products")
       const cart = await Cart.findOne({userId:userId},"products")
-      existingWishlist = wishlist?.products?.map((w)=> w?.id_pack)
-      existingCart = cart?.products?.map((c)=> c?.id_pack)
+      existingWishlist = wishlist?.products?.map((w)=> w?.id)
+      existingCart = cart?.products?.map((c)=> c?.id)
     }
     const wishListCheck = existingWishlist.length !== 0 ? ` IF(p.id_pack in (${ existingWishlist?.join(",")}), true, false) as wishlist, ` : ""
     const cartCheck = existingCart.length !== 0 ? ` IF(p.id_pack in (${ existingCart?.join(",")}), true, false) as cart, ` : ""

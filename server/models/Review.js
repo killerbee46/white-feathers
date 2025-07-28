@@ -5,11 +5,11 @@ const ReviewSchema = new mongoose.Schema(
     userId: {
       type: mongoose.ObjectId,
       ref:"Users",
-      required: true,
+      // required: true,
     },
-    objectId: {
-      type: mongoose.ObjectId,
-      ref:"Products",
+    productId: {
+      type: Number,
+      // ref:"Products",
     },
     type: {
       type: String,
@@ -23,6 +23,10 @@ const ReviewSchema = new mongoose.Schema(
     review:{
         type:String,
         required:true,
+    },
+    visible:{
+        type:Boolean,
+        default:true,
     },
   },
   { timestamps: true }
