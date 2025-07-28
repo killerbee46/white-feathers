@@ -17,6 +17,32 @@ export const getTestimonials = async (req, res) => {
 
         return res.status(200).json({
             status: 'success',
+            message: "Reviews fetched successfully",
+            data: newTestimonial
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            error,
+            message: "Error while getting testimonials",
+        });
+    }
+};
+
+export const getMyReviews = async (req, res) => {
+    try {
+        const userId = req?.user?._id
+        const testimonials = await Review.find({userId:userId},"review rating createdAt updatedAt")
+        const newTestimonial = testimonials.map((test) => {
+            return {
+                ...test?._doc,
+                allowActions: true
+            }
+        })
+
+        return res.status(200).json({
+            status: 'success',
             message: "Testimonials fetched successfully",
             data: newTestimonial
         })
