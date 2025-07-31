@@ -2,7 +2,7 @@ import Review from "../models/Review.js";
 
 export const getTestimonials = async (req, res) => {
     try {
-        const testimonials = await Review.find({ type: "testimonial" })?.populate("userId")
+        const testimonials = await Review.find({ type: "testimonial" })?.populate("userId","name email")
         const userId = req?.user?._id
         let allowActions = false
         const newTestimonial = testimonials.map((test) => {
@@ -59,7 +59,7 @@ export const getMyReviews = async (req, res) => {
 export const getProductReview = async (req, res) => {
     try {
         const { productId } = req?.params
-        const testimonials = await Review.find({ type: "product", productId: productId }).populate('userId')
+        const testimonials = await Review.find({ type: "product", productId: productId })?.populate("userId","name email")
         const userId = req?.user?._id
         let allowActions = true
         const newTestimonial = testimonials.map((test) => {
