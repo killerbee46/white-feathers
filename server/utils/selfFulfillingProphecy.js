@@ -19,13 +19,13 @@ export const selfFulfillingProphecy = async (req, res, next) => {
   const nepaliDate = dayjs().tz("Asia/Kathmandu").format("HH")
   const shouldUpdate = dayjs().diff(last_updated_at, 'h')
 
-  if (nepaliDate >= 6 && shouldUpdate > 12 && metalsApi !== "") {
+  if (nepaliDate >= 2 && shouldUpdate > 12 && metalsApi !== "") {
 
     const exchangeRates = await axios.get(metalsApi).then(data => {
       const apiData = data?.data?.data?.payload[0]
       const rate = apiData?.rates
 
-      if (dayjs(apiData?.published_on).diff(dayjs(last_updated_at)) > 0) {
+      if (dayjs(apiData?.published_on).diff(dayjs(last_updated_at)) > 0 && data?.data?.data?.payload?.length !== 0) {
         rate?.map((rt) => {
           let updateQuery = ""
           switch (rt?.currency?.iso3) {
