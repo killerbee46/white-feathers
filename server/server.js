@@ -14,6 +14,8 @@ import sqlRoutes from "./routes/sqlRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import materialRoutes from "./routes/materialRoutes.js";
+import metalRoutes from "./routes/metalRoutes.js";
 import cors from "cors";
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
@@ -55,7 +57,6 @@ app.use(morgan("dev"));
 
 app.use('/uploads', express.static('uploads'))
 
-
 //rest api
 app.get("/", (req, res) => {
   res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>`)
@@ -76,6 +77,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.post("/api/price-calculator", calculatePrice)
 app.use("/upload", uploadRoutes)
+app.use("/api/materials", materialRoutes);
+app.use("/api/metals", metalRoutes);
 
 //PORT
 const PORT = process.env.PORT || 8080;
