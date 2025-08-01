@@ -1,5 +1,6 @@
 import { sequelize } from "../config/tempDb.js";
 import Cart from "../models/Cart.js";
+import Wishlist from "../models/Wishlist.js";
 import { sqlProductFetch } from "../utils/sqlProductFetch.js";
 
 export const getCart = async (req, res) => {
@@ -177,7 +178,78 @@ export const removeCart = async (req, res) => {
         console.log(error);
         res.status(500).send({
             success: false,
-            message: "Error while adding to Cart",
+            message: "Error while switching to Cart",
+            error
+        });
+    }
+};
+
+export const switchToWishlist = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const userId = req?.user?._id
+        const wishlist = await Wishlist.findOne({ userId: userId })
+        const cart = await Cart.findOne({ userId: userId })
+        req.body.userId = userId
+        let list = []
+
+        const query = sqlProductFetch("p.p_name as title,")+` and p.id_pack = ${productId} `
+        const [data] = await sequelize.query(query)
+        //validations
+        if (!productId) {
+            return res.send({ error: "Please select a product to add" });
+        }
+list = cart?.products
+
+            const newList = list?.filter((f)=> f.id != productId)
+
+            const existingCart = cart?.products?.map((p)=> p.id )
+            if (!existingCart.includes(parseInt(productId))) {
+                return res.status(409).json({
+                    status: 'failed',
+                    message: 'Product is not in the cart'
+                })
+            }
+            // list.push(productId)
+            const wish = await Cart.findByIdAndUpdate(cart?._id, {
+                products:newList
+            })
+        if (wishlist) {
+            list = wishlist?.products
+            const existingIds = wishlist.products?.map((p)=> p?.id )
+            if (existingIds.includes(parseInt(productId))) {
+                return res.status(409).json({
+                    status: 'failed',
+                    message: 'Product already in the Wishlist'
+                })
+            }
+            // list.push(productId)
+            const wishlistCreate = await Wishlist.findByIdAndUpdate(wishlist?._id, {
+                $push: { products: {...data[0]} }
+            })
+
+            
+
+            return res.status(201).json({
+                status: 'success',
+                message: "Switched to Wishlist"
+            })
+        } else {
+            list.push({...data[0]})
+            const wish = new wishlist({
+                userId: userId,
+                products: list
+            }).save()
+            return res.status(201).json({
+                status: 'success',
+                message: "Switched to Wishlist",
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while switching to Wishlist",
             error
         });
     }
