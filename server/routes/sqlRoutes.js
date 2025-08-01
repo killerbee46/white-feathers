@@ -1,6 +1,8 @@
 import express from "express";
-import { getCategories, getProduct, getProducts } from "../controllers/sqlControllers.js";
-import { checkForSignIn } from "../middlewares/authMiddleware.js";
+import { createOrder, getCategories, getOrders, getOrdersByUser, getProduct, getProducts } from "../controllers/sqlControllers.js";
+import { checkForSignIn, isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
+import { completeEsewaPayment, failedEsewaPayment, initializeEsewaPayment } from "../controllers/paymentController.js";
+import { verifyEsewaPayment } from "../utils/esewa.js";
 
 const router = express.Router();
 
@@ -12,6 +14,11 @@ router.get("/products/:id",checkForSignIn, getProduct);
 router.get("/categories",getCategories);
 
 //order 
-router.post("/orders",()=> {});
+router.post("/orders",requireSignIn,createOrder);
+router.get("/orders",requireSignIn, isAdmin,getOrders);
+router.get("/orders/me",requireSignIn,getOrdersByUser);
+router.post("/initialize-esewa",requireSignIn,initializeEsewaPayment);
+router.get("/complete-payment",requireSignIn, completeEsewaPayment);
+router.get("/complete-payment", failedEsewaPayment);
 
 export default router

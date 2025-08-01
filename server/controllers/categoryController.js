@@ -61,14 +61,14 @@ export const updateCategory = async (req, res) => {
 export const getCategories = async (req, res) => {
   try {
     const category = await Category.find({});
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "All Categories List",
       category,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    return res.status(500).send({
       success: false,
       error,
       message: "Error while getting all categories",

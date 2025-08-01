@@ -3,9 +3,6 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import connectDB from "./config/db.js";
 import apiRoutes from "./routes/apiRoutes.js";
-import authRoutes from "./routes/authRoute.js";
-import futsalRoutes from "./routes/futsalRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -22,7 +19,7 @@ import swaggerUi from 'swagger-ui-express';
 import path from "path";
 import swaggerJSDoc from 'swagger-jsdoc';
 import { tempDbConnect } from "./config/tempDb.js";
-import { calculatePrice } from "./controllers/priceCalculatorController.js";
+import { selfFulfillingProphecy } from "./utils/selfFulfillingProphecy.js";
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename);
 
@@ -62,20 +59,12 @@ app.get("/", (req, res) => {
   res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>`)
 });
 
+app.get("/payment-test", function (req, res) {
+  res.sendFile(__dirname + "/test.html");
+});
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use("/api", apiRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/products", futsalRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/booking", bookingRoutes);
-app.use("/api/profile", profileRoutes);
-app.use("/api/sql", sqlRoutes);
-app.use("/api/wishlist", wishlistRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/reviews", reviewRoutes);
-app.post("/api/price-calculator", calculatePrice)
+app.use("/api",selfFulfillingProphecy, apiRoutes);
 app.use("/upload", uploadRoutes)
 app.use("/api/materials", materialRoutes);
 app.use("/api/metals", metalRoutes);
