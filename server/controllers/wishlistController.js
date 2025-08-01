@@ -28,6 +28,7 @@ export const addWishlist = async (req, res) => {
         const { productId } = req.params;
         const userId = req?.user?._id
         const wishlist = await Wishlist.findOne({ userId: userId })
+        const cart = await Cart.findOne({ userId: userId })
         req.body.userId = userId
         let list = []
 
@@ -36,6 +37,16 @@ export const addWishlist = async (req, res) => {
         //validations
         if (!productId) {
             return res.send({ error: "Please select a product to add" });
+        }
+
+        if(cart){
+            const existingCart = Cart?.products?.map((p)=> p?.id )
+            if (existingCart.includes(parseInt(productId))) {
+                return res.status(409).json({
+                    status: 'failed',
+                    message: 'Product is in the cart'
+                })
+            }
         }
 
         if (wishlist) {
