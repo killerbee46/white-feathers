@@ -4,6 +4,8 @@ import morgan from "morgan";
 import connectDB from "./config/db.js";
 import apiRoutes from "./routes/apiRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import materialRoutes from "./routes/materialRoutes.js";
+import metalRoutes from "./routes/metalRoutes.js";
 import cors from "cors";
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
@@ -57,6 +59,8 @@ app.get("/payment-test", function (req, res) {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",selfFulfillingProphecy, apiRoutes);
 app.use("/upload", uploadRoutes)
+app.use("/api/materials", materialRoutes);
+app.use("/api/metals", metalRoutes);
 
 //PORT
 const PORT = process.env.PORT || 8080;
@@ -65,5 +69,4 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(
     `Server Running on ${process.env.DEV_MODE} mode on port ${PORT}`.bgCyan.white
-  );
-});
+  );});
