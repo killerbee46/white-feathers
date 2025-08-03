@@ -12,11 +12,47 @@ export const selfFulfillingProphecy = async (req, res, next) => {
 
   const refCurrQuery = 'select last_updated_at from currency where cur_name = "USD"'
   const [refCurr] = await sequelize.query(refCurrQuery)
+  const refMatQuery = 'select last_updated_at from package_material where pm_id = 2'
+  const [refMat] = await sequelize.query(refMatQuery)
   const last_updated_at = refCurr[0]?.last_updated_at
+  const rate_last_updated_at = refMat[0]?.last_updated_at
 
-  const metalsApi = `https://www.nrb.org.np/api/forex/v1/rates?from=${dayjs().format('YYYY-MM-DD')}&to=${dayjs().format('YYYY-MM-DD')}&page=1&per_page=100`
+  const nepaliDate = dayjs().tz("Asia/Kathmandu").format("HH")
+
+  if (dayjs().format('YYYY-MM-DD') !== dayjs(rate_last_updated_at).format('YYYY-MM-DD') && nepaliDate >= 11) {
+      const options = {
+    method: 'GET',
+    url: 'https://nepali-gold-silver-rate-live.p.rapidapi.com/api/rates/Nepal',
+    headers: {
+      'x-rapidapi-key': '08e1f67a35msh92b8381f4fd5708p1547f3jsneb1f6be75935',
+      'x-rapidapi-host': 'nepali-gold-silver-rate-live.p.rapidapi.com'
+    }
+  };
+    const goldSilverRates = await axios.request(options).then((data) => {
+      const rateData = data?.data
+      const metals = rateData?.metals
+
+      const resData = metals.map(async(met) => {
+        let updateRateQuery = ""
+        switch (met?.name) {
+          case "Gold":
+            updateRateQuery = `update package_material set price = ${met?.types[0]?.per1tola}, last_updated_at = '${dayjs()}' where pm_id = 2`
+            sequelize.query(updateRateQuery)
+            break
+          case "Silver":
+            updateRateQuery = `update package_material set price = ${met?.types[0]?.per1tola}, last_updated_at = '${dayjs()}' where pm_id = 3`
+            sequelize.query(updateRateQuery)
+            break
+          default:
+            break;
+        }
+      });
+    })
+  }
 
   if (dayjs().format('YYYY-MM-DD') !== dayjs(last_updated_at).format('YYYY-MM-DD')) {
+
+    const metalsApi = `https://www.nrb.org.np/api/forex/v1/rates?from=${dayjs().format('YYYY-MM-DD')}&to=${dayjs().format('YYYY-MM-DD')}&page=1&per_page=100`
 
     const exchangeRates = await axios.get(metalsApi).then(data => {
       const apiData = data?.data?.data?.payload?.[0]

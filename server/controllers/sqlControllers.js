@@ -217,3 +217,68 @@ export const getOrders = async (req, res, next) => {
     });
   }
 }
+
+export const getMaterials = async (req, res, next) => {
+ try {
+    const materialsQuery = `SELECT * from package_material`
+    const [materials] = await sequelize.query(materialsQuery)
+
+    return res.status(200).json({
+      status: 'success',
+      message: "Materials Fetched Successfully",
+      data: materials
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      status: 'failed',
+      message: "Erorr while getting materials",
+      error: error.message,
+    });
+  }
+}
+
+export const getMetals = async (req, res, next) => {
+ try {
+    const metalsQuery = `SELECT pm.pm_id, pm.pmt_name,round((pm.purity/100 * pmt.price),2) as price FROM package_metal pm 
+inner join package_material pmt where pmt.pm_id = pm.pm_id`
+    const [metals] = await sequelize.query(metalsQuery)
+
+    return res.status(200).json({
+      status: 'success',
+      message: "Metals Fetched Successfully",
+      data: metals
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      status: 'failed',
+      message: "Erorr while getting metals",
+      error: error.message,
+    });
+  }
+}
+
+export const getMetalsByMaterial = async (req, res, next) => {
+ try {
+    const {materialId} = req?.params
+
+    const materialsQuery = `SELECT pm.pm_id, pm.pmt_name,round((pm.purity/100 * pmt.price),2) as price FROM package_metal pm
+inner join package_material pmt where pmt.pm_id = pm.pm_id
+and pm.pm_id = ${materialId} `
+    const [materials] = await sequelize.query(materialsQuery)
+
+    return res.status(200).json({
+      status: 'success',
+      message: "Materials Fetched Successfully", 
+      data: materials
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      status: 'failed',
+      message: "Erorr while getting orders",
+      error: error.message,
+    });
+  }
+}
