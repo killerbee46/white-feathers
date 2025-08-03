@@ -53,25 +53,45 @@ export const updateMaterial = async (req, res) => {
     const { id } = req.params;
     const updates = req.body || {};
 
-    const material = await Material.findById(id);
-    if (!material) {
-      return res.status(404).json({ error: 'Material not found' });
+    // Validate request body
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'No update data provided' 
+      });
     }
 
-    // Only update the fields that are provided in the request
-    if (updates.type !== undefined) material.type = updates.type;
-    if (updates.unitPrice !== undefined) material.unitPrice = updates.unitPrice;
-    if (updates.discount !== undefined) material.discount = updates.discount;
+    // Find the material first
+    const material = await Material.findById(id);
+    
+    if (!material) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Material not found' 
+      });
+    }
 
-    await material.save();
+    // Update the material fields
+    Object.keys(updates).forEach(update => {
+      material[update] = updates[update];
+    });
+
+    // Save the material - this will trigger the post-save hook
+    const updatedMaterial = await material.save();
 
     return res.status(200).json({
+      success: true,
       message: 'Material updated successfully',
-      material,
+      data: updatedMaterial
     });
+
   } catch (err) {
     console.error('Update Material Error:', err);
-    return res.status(400).json({ error: err.message });
+    return res.status(500).json({
+      success: false,
+      message: 'Error updating material',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 

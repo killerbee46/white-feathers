@@ -16,26 +16,48 @@ const materialSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Post-save hook to update related metals' prices automatically
-materialSchema.post('save', async function (doc) {
+// Function to update related metals
+const updateRelatedMetals = async (material) => {
   try {
-    // Use mongoose.model() to get the Metal model to avoid circular dependency
     const Metal = mongoose.model('Metal');
-    const metals = await Metal.find({ materialid: doc._id });
+    const metals = await Metal.find({ materialid: material._id });
 
     if (metals.length === 0) {
-      console.log(`No metals found linked to material: ${doc.type}`);
+      console.log(`No metals found linked to material: ${material.type}`);
       return;
     }
 
-    for (const metal of metals) {
-      metal.unitPrice = doc.unitPrice * (metal.purityPercentage / 100);
-      metal.basePricePerGram = metal.unitPrice / 11.664;
-      await metal.save();
-    }
-    console.log(`Updated ${metals.length} metal(s) for material: ${doc.type}`);
+    const updatePromises = metals.map(metal => {
+      const pricePerTola = material.unitPrice * (metal.purityPercentage / 100);
+      const basePricePerGram = pricePerTola / 11.664;
+      
+      return Metal.findByIdAndUpdate(
+        metal._id,
+        {
+          unitPrice: Number(pricePerTola.toFixed(2)),
+          basePricePerGram: Number(basePricePerGram.toFixed(2))
+        },
+        { new: true }
+      );
+    });
+
+    await Promise.all(updatePromises);
+    console.log(`Updated ${metals.length} metal(s) for material: ${material.type}`);
   } catch (err) {
     console.error('Error updating metals:', err);
+    throw err; // Re-throw to handle in the calling function
+  }
+};
+
+// Post-save hook
+materialSchema.post('save', async function(doc) {
+  await updateRelatedMetals(doc);
+});
+
+// Post findOneAndUpdate hook
+materialSchema.post('findOneAndUpdate', async function(doc) {
+  if (doc) { // Only proceed if document was found and updated
+    await updateRelatedMetals(doc);
   }
 });
 
