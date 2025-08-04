@@ -8,7 +8,7 @@ export const initializeEsewaPayment = async (req, res) => {
   try {
 const { products, productId } = req?.body
     const userId = req?.user?._id
-    const user = await userModel.findOne({ _id: userId }, 'name email phone address')
+    const user = await userModel.findById(userId, 'name email phone address')
     if ((!products || products?.length === 0) && productId) {
       const query = sqlProductFetch("p.p_name as title,") + ` and p.id_pack = ${productId} `
       const [data] = await sequelize.query(query)

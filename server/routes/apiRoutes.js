@@ -10,6 +10,7 @@ import wishlistRoutes from "./wishlistRoutes.js";
 import cartRoutes from "./cartRoutes.js";
 import reviewRoutes from "./reviewRoutes.js";
 import currencyRoutes from "./currencyRoutes.js";
+import notificationRoutes from "./notificationRoutes.js";
 import { calculatePrice } from "../controllers/priceCalculatorController.js";
 
 const router = express.Router();
@@ -33,5 +34,6 @@ router.use("/cart", cartRoutes);
 router.use("/reviews", reviewRoutes);
 router.post("/price-calculator", calculatePrice)
 router.use("/currency", currencyRoutes)
+router.use("/notifications", notificationRoutes)
 
 export default router
