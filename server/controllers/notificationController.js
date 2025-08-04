@@ -1,4 +1,3 @@
-import Cart from "../models/Cart.js";
 import Notification from "../models/Notification.js";
 import userModel from "../models/userModel.js";
 
@@ -15,8 +14,8 @@ export const getNotifications = async (req, res) => {
                 opened = true
             }
             return {
-                ...not,
-                opened:opened
+                ...not?._doc,
+                read:opened
             }
         })
 
@@ -24,7 +23,7 @@ export const getNotifications = async (req, res) => {
             status: 'success',
             message: "Notifications Fetched Successfully",
             role:user?.role === 3,
-            data: notifications
+            data: mod
 
         })
     } catch (error) {
