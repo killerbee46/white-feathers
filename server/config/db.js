@@ -10,20 +10,8 @@ const connectDB = async () => {
     );
 
   } catch (error) {
-    console.log(`Errro in Mongodb ${error}`.bgRed.white);
+    console.log(`Error in Mongodb ${error}`.bgRed.white);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 export default connectDB;

@@ -2,6 +2,7 @@ import express from "express";
 import { createOrder, getCategories, getMaterials, getMetals, getMetalsByMaterial, getOrders, getOrdersByUser, getProduct, getProducts } from "../controllers/sqlControllers.js";
 import { checkForSignIn, isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 import { completeEsewaPayment, failedEsewaPayment, initializeEsewaPayment } from "../controllers/paymentController.js";
+import { sqlCalculatePrice } from "../controllers/priceCalculatorController.js";
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.post("/initialize-esewa",requireSignIn,initializeEsewaPayment);
 router.get("/complete-payment",requireSignIn, completeEsewaPayment);
 router.get("/materials", getMaterials);
 router.get("/metals", getMetals);
+router.post("/calculate-price", sqlCalculatePrice);
 router.get("/metals/:materialId", getMetalsByMaterial);
 
 export default router

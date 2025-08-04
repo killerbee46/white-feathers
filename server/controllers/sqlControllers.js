@@ -99,7 +99,8 @@ export const createOrder = async (req, res) => {
   try {
     const { products, productId } = req?.body
     const userId = req?.user?._id
-    const user = await userModel.findOne({ userId: userId }, 'name email phone address')
+    const user = await userModel.findById(userId, 'name email phone address')
+
     if ((!products || products?.length === 0) && productId) {
       const query = sqlProductFetch("p.p_name as title,") + ` and p.id_pack = ${productId} `
       const [data] = await sequelize.query(query)
@@ -121,12 +122,12 @@ export const createOrder = async (req, res) => {
       finalPrice:(finalPrice).toFixed(),
     })
 
-    const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id) VALUES (
-    '${orderDetails}','${user?.name}','${user?.phone}','${user?.email}','${user?.address}','${dayjs().unix()}',1
+    const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id, checkout) VALUES (
+    '${orderDetails}','${user?.name}','${user?.phone}','${user?.email}','${user?.address}','${dayjs().unix()}',1,1
     );`
     const [orderCreate] = await sequelize.query(orderQuery)
 
-    return res.status(200).json({
+    return res.status(201).json({
       status: 'success',
       message: "Order Created Successfully",
     })

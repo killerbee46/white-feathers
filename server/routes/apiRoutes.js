@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.get("/",(req, res)=>{
     return res.send(200, { 
-        message:"Welcome to Futsal Online Api",
+        message:"Welcome to White Feather's Jewellery's Api",
         user:req?.user
     })
 })

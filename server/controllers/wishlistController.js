@@ -41,7 +41,7 @@ export const addWishlist = async (req, res) => {
 
         if(cart){
             const existingCart = Cart?.products?.map((p)=> p?.id )
-            if (existingCart.includes(parseInt(productId))) {
+            if (existingCart?.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
                     message: 'Product is in the cart'
@@ -52,7 +52,7 @@ export const addWishlist = async (req, res) => {
         if (wishlist) {
             list = wishlist?.products
             const existingIds = wishlist.products?.map((p)=> p.id )
-            if (existingIds.includes(parseInt(productId))) {
+            if (existingIds?.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
                     message: 'Product already in the wishlist'
