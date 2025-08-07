@@ -219,6 +219,54 @@ export const getOrders = async (req, res, next) => {
   }
 }
 
+export const getOrderDetails = async (req, res, next) => {
+ try {
+  const {trackingCode} = req?.params 
+    const userId = req?.user?._id
+    const user = await userModel.findById(userId, 'phone role')
+
+    const orderQuery = `SELECT cookie_id as order_details,name, cno as phone, email, address,tracking_code, esewa_code, p_amount, p_date  from cart_book
+    where length(cookie_id)>10 and checkout = 1 and tracking_code = ${trackingCode}
+    ;`
+    const [orders] = await sequelize.query(orderQuery)
+    const order = orders[0]
+
+    if (!(user?.phone === order?.phone || user?.role === 3)) {
+      return res.status(401).json({
+      status: 'failed',
+      message: "Not authorized to view order"
+    })
+    }
+
+    const orderData = () =>{
+      const orderDetail = JSON.parse(order?.order_details)
+      const esewa_code = order?.esewa_code
+      const transaction_mode = order?.esewa_code && order?.esewa_code !== "" ? "esewa" : "cod"
+      delete order?.order_details
+      delete order?.esewa_code
+      return {
+        ...order,
+        ...orderDetail,
+        transaction_mode:transaction_mode,
+        transaction_code:esewa_code
+      }
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: "Order Fetched Successfully",
+      data: orderData()
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      status: 'failed',
+      message: "Erorr while getting orders",
+      error: error.message,
+    });
+  }
+}
+
 export const getMaterials = async (req, res, next) => {
  try {
     const materialsQuery = `SELECT * from package_material`

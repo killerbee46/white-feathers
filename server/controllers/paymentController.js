@@ -25,9 +25,9 @@ const { products, productId } = req?.body
 
     const orderDetails = JSON.stringify({
       products:products,
-      totalPrice:(finalPrice+totalDiscount).toFixed(),
-      totalDiscount:(totalDiscount).toFixed(),
-      finalPrice:(finalPrice).toFixed(),
+      totalPrice:(finalPrice+totalDiscount).toFixed(2),
+      totalDiscount:(totalDiscount).toFixed(2),
+      finalPrice:(finalPrice).toFixed(2),
     })
 
     const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id) VALUES (
@@ -52,7 +52,7 @@ const { products, productId } = req?.body
       success: true,
       payment: paymentInitiate,
       id:tId,
-      amount:(finalPrice).toFixed()
+      amount:(finalPrice).toFixed(2)
     });
   } catch (error) {
     return res.status(500).json({
