@@ -16,10 +16,12 @@ import LoginHandler from "../LoginHandler/LoginHandler";
 import CurrencySwitch from "../CurrencySwitch/CurrencySwitch";
 import './Navbar.scss';
 import Logo from "../Logo/Logo";
+import NavMenus from "./NavMenus";
 
 export const Navbar = ({
   menus,
   logo,
+  smallLogo
 }: any) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuSwitch = () => {
@@ -30,30 +32,29 @@ export const Navbar = ({
   return (
     <>
       <Affix
-        className="navbar_container py-2.5 px-10 bg"
+        className="navbar_container py-2 px-5 md:px-10"
       >
         <Row className="navbar" justify={"space-between"} align={"middle"}>
-          <Col lg={3} md={4} sm={6} xs={8}>
+          <Col lg={3} md={4} sm={0} xs={0}>
             <Logo src={logo} />
           </Col>
+          <Col lg={0} md={0} sm={2} xs={3}>
+            <Logo src={smallLogo} />
+          </Col>
           <Col lg={13} md={0} sm={0} xs={0}>
-            <Row justify={"start"} style={{ gap: 20 }} className="navMenu">
-              {menus?.map((d: MenuItemTypes, i: number) => {
-                return (
-                  <Col key={i}>
-                    <Typography.Link href={d?.path}>
-                      <div className="text-black">{d?.label}</div>
-                    </Typography.Link>
-                  </Col>
-                );
-              })}
-            </Row>
+            <NavMenus menus={menus} />
           </Col>
           <Col lg={8} sm={0} md={0} xs={0}>
             <Space size={"large"} style={{ float: "right" }}>
               <SearchBar />
               <CurrencySwitch />
               <LoginHandler />
+            </Space>
+          </Col>
+          <Col lg={0} sm={14} md={16} xs={12}>
+            <Space style={{ float: "right" }}>
+              <SearchBar small />
+              <CurrencySwitch />
             </Space>
           </Col>
           <Col
@@ -64,7 +65,7 @@ export const Navbar = ({
             className="flex justify-end lg:hidden"
           >
             <div className="p-4 cursor-pointer pe-0" onClick={menuSwitch}>
-              <MenuOutlined />
+              <MenuOutlined className="text-xl" />
             </div>
           </Col>
         </Row>
@@ -77,16 +78,16 @@ export const Navbar = ({
         className="menu-drawer"
         title={
           <Row justify={"space-between"} align={"middle"}>
-            <Col md={4} sm={6} xs={8}>
+            <Col md={6} sm={8} xs={10}>
               <a href="/">
                 <Image preview={false} src={logo || defaultLogo} width={'80%'} alt="logo" />{" "}
               </a>
             </Col>
             <Col>
-              <LoginHandler />
-            </Col>
-            <Col>
-              <CloseOutlined className="cursor-pointer" onClick={menuSwitch} />
+              <Space size={'large'}>
+                <LoginHandler />
+                <CloseOutlined className="cursor-pointer text-xl text text-danger" onClick={menuSwitch} />
+              </Space>
             </Col>
           </Row>
 

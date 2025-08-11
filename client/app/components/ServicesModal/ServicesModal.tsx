@@ -1,5 +1,5 @@
 import { CheckCircleFilled, EnvironmentFilled, HomeFilled, ToolFilled } from '@ant-design/icons'
-import { Button, Flex, Modal, Space, Row, Col, Image } from 'antd'
+import { Button, Flex, Modal, Space, Row, Col, Image, Divider } from 'antd'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
@@ -107,6 +107,7 @@ const ServicesModal = () => {
     return (
         <>
             <Modal className='w-[90%] lg:!w-[50%]' onCancel={closeModal} title={<span className='capitalize'>{activeData?.title}</span>} open={modalState?.open} footer={null}>
+                <Divider className='!mt-0' />
                 <ModalContent />
             </Modal>
             <Flex justify='space-around' className='w-full'>

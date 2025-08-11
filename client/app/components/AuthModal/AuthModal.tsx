@@ -1,5 +1,6 @@
-import { Button, Flex, Modal } from 'antd'
+import { Button, Divider, Flex, Modal } from 'antd'
 import React, { useState } from 'react'
+import LoginForm from '../Forms/LoginForm'
 
 const AuthModal = () => {
     const [modalState,setModalState] = useState({
@@ -26,10 +27,11 @@ const AuthModal = () => {
   return (
     <>
     <Modal onCancel={closeModal}  title={<span className='capitalize'>{modalState?.type} | White Feather's Jewellery</span>} open={modalState?.open} footer={null}>
+        <Divider className='!mt-0' />
         {
             modalState?.type === "login" ?
-            "Login Form" :
-            "Register Form"
+            <LoginForm closeForm={closeModal} switchForm={modalSwitch} /> :
+            <LoginForm closeForm={closeModal} switchForm={modalSwitch} />
         }
     </Modal>
     

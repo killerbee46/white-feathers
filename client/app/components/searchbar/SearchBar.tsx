@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const SearchBar = (props:any) => {
     const [text, setText] = useState('')
-    const {placeholder} = props
+    const {placeholder,small} = props
 
     const onChange = (e:string) => {
         setText(e)
@@ -14,7 +14,7 @@ const SearchBar = (props:any) => {
         
     }
   return (
-    <Input className='!border-[#3892C6] !border-1' placeholder={placeholder || "Search..."} onChange={(e:any)=> onChange(e.target.value)} suffix={<Link href={text && text !== "" ? `products?name=${text}`:"#"}><SearchOutlined /></Link>} size={'large'} style={{width:props?.half ? "50%" : "100%",}} />
+    <Input className='!border-[#3892C6] !border-1' placeholder={placeholder || "Search..."} onChange={(e:any)=> onChange(e.target.value)} suffix={<Link href={text && text !== "" ? `products?name=${text}`:"#"}><SearchOutlined /></Link>} size={small ? 'middle' : 'large'} style={{width:props?.half ? "50%" : "100%",}} />
   )
 }
 

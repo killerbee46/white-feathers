@@ -1,0 +1,9 @@
+.sectionTitle{
+    display: inline-block;
+    .title{
+        font-size: 18px;
+        &.underlined{
+           border-bottom: 2px solid #3892C6;
+        }
+    }
+}

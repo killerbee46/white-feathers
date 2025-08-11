@@ -1,6 +1,10 @@
 export interface MenuItemTypes {
   label: string;
   path: string;
+  children?:{
+    label: string;
+  path: string;
+  }[]
 }
 
 export interface NavBannerTypes {

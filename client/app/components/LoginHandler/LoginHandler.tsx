@@ -1,4 +1,4 @@
-import { HeartFilled, ShoppingFilled, UserOutlined } from '@ant-design/icons'
+import { HeartOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons'
 import { Flex, Popover } from 'antd'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -14,10 +14,10 @@ const LoginHandler = () => {
         <div>
             <Flex gap={20} className="py-5">
                 <Link href={'/wishlist'}>
-                    <HeartFilled className="text-xl" />
+                    <HeartOutlined className="text-xl" />
                 </Link>
                 <Link href={'/cart'}>
-                    <ShoppingFilled className="text-xl" />
+                    <ShoppingCartOutlined className="text-xl" />
                 </Link>
                 <Link href={''}>
                     <Popover placement="bottomRight" content={<NonAuth />}>
