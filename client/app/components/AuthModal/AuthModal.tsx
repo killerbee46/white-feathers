@@ -1,6 +1,7 @@
 import { Button, Divider, Flex, Modal } from 'antd'
 import React, { useState } from 'react'
 import LoginForm from '../Forms/LoginForm'
+import RegisterForm from '../Forms/RegisterForm'
 
 const AuthModal = () => {
     const [modalState,setModalState] = useState({
@@ -31,7 +32,7 @@ const AuthModal = () => {
         {
             modalState?.type === "login" ?
             <LoginForm closeForm={closeModal} switchForm={modalSwitch} /> :
-            <LoginForm closeForm={closeModal} switchForm={modalSwitch} />
+            <RegisterForm closeForm={closeModal} switchForm={modalSwitch} />
         }
     </Modal>
     
