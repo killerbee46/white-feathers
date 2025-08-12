@@ -117,7 +117,7 @@ const ServicesModal = () => {
                 <Space onClick={() => modalSwitch(2)} className='!text-white cursor-pointer md:!text-[14px] !text-[12px]'>
                     <ToolFilled /> Custom Design
                 </Space>
-                <Button className='!text-blue-600 border-1 border-blue-600 my-1 !text-[12px]' onClick={() => modalSwitch(3)}>Sell Gold / Jewelleries</Button>
+                <Button className='!text-blue-600 border-1 border-blue-600 my-1 !text-[12px] !px-1 md:!px-[5px]' onClick={() => modalSwitch(3)}>Sell Gold / Jewelleries</Button>
             </Flex>
 
         </>

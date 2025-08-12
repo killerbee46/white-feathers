@@ -1,4 +1,4 @@
-import { Row, Col, Popover, Flex, Image } from 'antd';
+import { Row, Col, Popover, Flex, Image, Collapse, Divider } from 'antd';
 import React from 'react'
 import { MenuItemTypes } from './Navbar.types';
 import Link from 'next/link';
@@ -91,7 +91,7 @@ const SubMenuContainer = ({ menus, label }: any) => {
 
 const NavMenus = ({ menus }: any) => {
     return (
-        <Row justify={"start"} style={{ gap: 20 }} className="navMenu px-2">
+        <Row justify={"start"} style={{ gap: 20 }} className="navMenu px-1">
             {menus?.map((d: MenuItemTypes, i: number) => {
                 return (
                     <Col key={i}>
@@ -107,6 +107,49 @@ const NavMenus = ({ menus }: any) => {
                                     {d?.label}
                                 </Link>
                         }
+                    </Col>
+                );
+            })}
+        </Row>
+    )
+}
+
+export const MiniNavMenus = ({ menus }: any) => {
+    console.log(menus,"mini menu")
+    return (
+        <Row justify={"start"} style={{ gap: 10, flexDirection:'column' }} className="navMenu px-2">
+            {menus?.map((d: any, i: number) => {
+                const first = d?.children?.slice(0, 1)[0]
+                const menuRemap:any = [{
+                    key: 1,
+                    label: <Link href={`/products?name=%20${d?.label.toLowerCase} `}>{d?.label}</Link>,
+                    children: <Flex vertical className='!-mt-2'>
+                        {
+                            first?.children?.map((child:any,i:number)=> {
+                                return <div>
+                                    <Divider className='!m-0 !my-1' />
+                                    <Link className='sub-menu' key={i} href={`/products?name=%20${d?.label.toLowerCase + " " + child?.label.toLowerCase()}%20`}>{child?.label}</Link>
+                                </div>
+                            })
+                        }
+                    </Flex>
+                }]
+                return (
+                    <Col key={i}>
+                        {
+                            d?.children && d?.children?.length !== 0 ?
+                                <Collapse className='menu-collapse' expandIconPosition='end' accordion ghost items={menuRemap} />
+                                // <Popover placement='bottom' content={<SubMenuContainer label={d?.label} menus={d?.children} />}>
+                                //     <Link href={`/products?name=%20${d?.label.toLowerCase()}%20`} className='menu-item'>
+                                //         {d?.label}
+                                //     </Link>
+                                // </Popover>
+                                :
+                                <Link href={d?.path} className='menu-item'>
+                                    {d?.label}
+                                </Link>
+                        }
+                        <Divider className='!m-0 !mt-1' />
                     </Col>
                 );
             })}

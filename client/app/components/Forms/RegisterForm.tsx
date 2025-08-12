@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Row, Space, Typography } from 'antd'
+import { Button, Col, Flex, Form, Input, Row, Space, Typography } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import React from 'react'
 import '../../styles/_form.scss'
@@ -21,7 +21,7 @@ const RegisterForm = ({ closeForm, switchForm=(e)=>console.log("error") }: Regis
     }
     return (
         <>
-            <Form layout='vertical' className='wf_form !p-5 !py-1'>
+            <Form layout='vertical' className='wf_form !p-3 !md:p-5 !py-1'>
                 <Form.Item name={'name'} label="Name">
                     <Input />
                 </Form.Item>
@@ -47,10 +47,10 @@ const RegisterForm = ({ closeForm, switchForm=(e)=>console.log("error") }: Regis
                             <Typography.Paragraph onClick={()=>switchForm("login")} className='text primary cursor-pointer'>Already Have an Account ?</Typography.Paragraph>
                         </Col>
                         <Col md={12} xs={24}>
-                        <Space size={'large'}>
+                        <Flex gap={20} className='w-full justify-end'>
                             <Button onClick={closeForm} className='button danger'>Cancel</Button>
                             <Button className='button success'>Register</Button>
-                        </Space>
+                        </Flex>
                         </Col>
                     </Row>
                 </Form.Item>

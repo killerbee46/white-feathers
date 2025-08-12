@@ -3,7 +3,7 @@ import ServicesModal from '../ServicesModal/ServicesModal'
 
 const Topbar = () => {
   return (
-    <div>
+    <div className='px-2'>
       <ServicesModal />
     </div>
   )

@@ -16,7 +16,7 @@ import LoginHandler from "../LoginHandler/LoginHandler";
 import CurrencySwitch from "../CurrencySwitch/CurrencySwitch";
 import './Navbar.scss';
 import Logo from "../Logo/Logo";
-import NavMenus from "./NavMenus";
+import NavMenus, { MiniNavMenus } from "./NavMenus";
 
 export const Navbar = ({
   menus,
@@ -54,7 +54,6 @@ export const Navbar = ({
           <Col lg={0} sm={14} md={16} xs={12}>
             <Space style={{ float: "right" }}>
               <SearchBar small />
-              <CurrencySwitch />
             </Space>
           </Col>
           <Col
@@ -78,13 +77,12 @@ export const Navbar = ({
         className="menu-drawer"
         title={
           <Row justify={"space-between"} align={"middle"}>
-            <Col md={6} sm={8} xs={10}>
-              <a href="/">
-                <Image preview={false} src={logo || defaultLogo} width={'80%'} alt="logo" />{" "}
-              </a>
-            </Col>
+            <Col lg={0} md={0} sm={2} xs={3}>
+            <Logo src={smallLogo} />
+          </Col>
             <Col>
               <Space size={'large'}>
+                <CurrencySwitch />
                 <LoginHandler />
                 <CloseOutlined className="cursor-pointer text-xl text text-danger" onClick={menuSwitch} />
               </Space>
@@ -93,18 +91,7 @@ export const Navbar = ({
 
         }
       >
-        <Flex vertical>
-          {menus?.map((d: MenuItemTypes, i: number) => {
-            return (
-              <Typography.Link href={d?.path} key={i}>
-                <div className="py-1 text-black">{d?.label}</div>
-              </Typography.Link>
-            );
-          })}
-          {/* <div className="py-5">
-            <LoginHandler />
-          </div> */}
-        </Flex>
+        <MiniNavMenus menus={menus} />
       </Drawer>
     </>
   );
