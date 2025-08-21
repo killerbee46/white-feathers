@@ -68,7 +68,8 @@ export const registerController = async (req, res) => {
 //POST LOGIN
 export const loginController = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email:em, password } = req.body;
+    const email = em?.toLowerCase()
     //validation
     if (!email || !password) {
       return res.status(409).send({
@@ -93,9 +94,7 @@ export const loginController = async (req, res) => {
       });
     }
     //token
-    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d'
-    });
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET);
 
     if (!user.otp) {
       req.body = {
@@ -124,12 +123,11 @@ export const loginController = async (req, res) => {
 export const unverifiedLoginController = async (req, res) => {
   try {
     const { otp, data } = req?.body;
-    const { phone, email } = data;
+    const { phone, email:em } = data;
+    const email = em?.toLowerCase()
     const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
     const user = await userModel.findOne({ email }, "")
-    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d'
-    });
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET);
     const expired = (dayjs() - dayjs(otpData.otp_expiry)) > 0
     if (expired) {
       return res.status(400).send({

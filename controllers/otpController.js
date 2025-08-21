@@ -6,7 +6,8 @@ import { hashPassword } from "../helpers/authHelper.js";
 
 export const createOtp = async (req, res) => {
     try {
-        const { name, email, password, phone, address } = req?.body;
+        const { name, email:em, password, phone, address } = req?.body;
+        const email = em?.toLowerCase()
         //validations
         if (!name) {
             return res.send({ error: "Name is Required" });
@@ -63,6 +64,7 @@ export const createOtp = async (req, res) => {
                 otp_expiry: newToken.otp_expiry,
                 data: {
                     ...req?.body,
+                    email:email,
                     password:hashedPassword
                 }
             })

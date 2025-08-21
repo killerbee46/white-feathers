@@ -116,10 +116,10 @@ export const createOrder = async (req, res) => {
     })
 
     const orderDetails = JSON.stringify({
-      products:products,
-      totalPrice:(finalPrice+totalDiscount).toFixed(),
-      totalDiscount:(totalDiscount).toFixed(),
-      finalPrice:(finalPrice).toFixed(),
+      products: products,
+      totalPrice: (finalPrice + totalDiscount).toFixed(),
+      totalDiscount: (totalDiscount).toFixed(),
+      finalPrice: (finalPrice).toFixed(),
     })
 
     const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id, checkout) VALUES (
@@ -142,7 +142,7 @@ export const createOrder = async (req, res) => {
 };
 
 export const getOrdersByUser = async (req, res, next) => {
- try {
+  try {
     const userId = req?.user?._id
     const user = await userModel.findById(userId, 'phone')
 
@@ -151,7 +151,7 @@ export const getOrdersByUser = async (req, res, next) => {
     ;`
     const [orders] = await sequelize.query(orderQuery)
 
-    const orderData = orders?.map((ord)=> {
+    const orderData = orders?.map((ord) => {
       const orderDetail = JSON.parse(ord?.order_details)
       const esewa_code = ord?.esewa_code
       const transaction_mode = ord?.esewa_code && ord?.esewa_code !== "" ? "esewa" : "cod"
@@ -160,8 +160,8 @@ export const getOrdersByUser = async (req, res, next) => {
       return {
         ...ord,
         ...orderDetail,
-        transaction_mode:transaction_mode,
-        transaction_code:esewa_code
+        transaction_mode: transaction_mode,
+        transaction_code: esewa_code
       }
     })
 
@@ -181,7 +181,7 @@ export const getOrdersByUser = async (req, res, next) => {
 }
 
 export const getOrders = async (req, res, next) => {
- try {
+  try {
     const userId = req?.user?._id
     const user = await userModel.findById(userId, 'phone')
 
@@ -190,7 +190,7 @@ export const getOrders = async (req, res, next) => {
     ;`
     const [orders] = await sequelize.query(orderQuery)
 
-    const orderData = orders?.map((ord)=> {
+    const orderData = orders?.map((ord) => {
       const orderDetail = JSON.parse(ord?.order_details)
       const esewa_code = ord?.esewa_code
       const transaction_mode = ord?.esewa_code && ord?.esewa_code !== "" ? "esewa" : "cod"
@@ -199,8 +199,8 @@ export const getOrders = async (req, res, next) => {
       return {
         ...ord,
         ...orderDetail,
-        transaction_mode:transaction_mode,
-        transaction_code:esewa_code
+        transaction_mode: transaction_mode,
+        transaction_code: esewa_code
       }
     })
 
@@ -220,8 +220,8 @@ export const getOrders = async (req, res, next) => {
 }
 
 export const getOrderDetails = async (req, res, next) => {
- try {
-  const {trackingCode} = req?.params 
+  try {
+    const { trackingCode } = req?.params
     const userId = req?.user?._id
     const user = await userModel.findById(userId, 'phone role')
 
@@ -233,12 +233,12 @@ export const getOrderDetails = async (req, res, next) => {
 
     if (!(user?.phone === order?.phone || user?.role === 3)) {
       return res.status(401).json({
-      status: 'failed',
-      message: "Not authorized to view order"
-    })
+        status: 'failed',
+        message: "Not authorized to view order"
+      })
     }
 
-    const orderData = () =>{
+    const orderData = () => {
       const orderDetail = JSON.parse(order?.order_details)
       const esewa_code = order?.esewa_code
       const transaction_mode = order?.esewa_code && order?.esewa_code !== "" ? "esewa" : "cod"
@@ -247,8 +247,8 @@ export const getOrderDetails = async (req, res, next) => {
       return {
         ...order,
         ...orderDetail,
-        transaction_mode:transaction_mode,
-        transaction_code:esewa_code
+        transaction_mode: transaction_mode,
+        transaction_code: esewa_code
       }
     }
 
@@ -268,7 +268,7 @@ export const getOrderDetails = async (req, res, next) => {
 }
 
 export const getMaterials = async (req, res, next) => {
- try {
+  try {
     const materialsQuery = `SELECT * from package_material`
     const [materials] = await sequelize.query(materialsQuery)
 
@@ -288,7 +288,7 @@ export const getMaterials = async (req, res, next) => {
 }
 
 export const getMetals = async (req, res, next) => {
- try {
+  try {
     const metalsQuery = `SELECT pm.pm_id, pm.pmt_name,round((pm.purity/100 * pmt.price),2) as price FROM package_metal pm 
 inner join package_material pmt where pmt.pm_id = pm.pm_id`
     const [metals] = await sequelize.query(metalsQuery)
@@ -309,24 +309,24 @@ inner join package_material pmt where pmt.pm_id = pm.pm_id`
 }
 
 export const getMetalsByMaterial = async (req, res, next) => {
- try {
-    const {materialId} = req?.params
+  try {
+    const { materialId } = req?.params
 
-    const materialsQuery = `SELECT pm.pm_id, pm.pmt_name,round((pm.purity/100 * pmt.price),2) as price FROM package_metal pm
+    const materialsQuery = `SELECT pm.pmt_id, pm.pmt_name,round((pm.purity/100 * pmt.price),2) as price FROM package_metal pm
 inner join package_material pmt where pmt.pm_id = pm.pm_id
 and pm.pm_id = ${materialId} `
     const [materials] = await sequelize.query(materialsQuery)
 
     return res.status(200).json({
       status: 'success',
-      message: "Materials Fetched Successfully", 
+      message: "Metals Fetched Successfully",
       data: materials
     })
   } catch (error) {
     console.log(error);
     return res.status(500).send({
       status: 'failed',
-      message: "Erorr while getting orders",
+      message: "Erorr while getting metals",
       error: error.message,
     });
   }
