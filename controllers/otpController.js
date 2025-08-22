@@ -81,7 +81,9 @@ export const createOtp = async (req, res) => {
                 message: "OTP sent to your phone please verify to proceed further",
                 otp_expiry: token?.otp_expiry,
                 data: {
-                    ...req?.body
+                    ...req?.body,
+                    email:email,
+                    password:hashedPassword
                 }
             })
         }

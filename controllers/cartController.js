@@ -246,7 +246,7 @@ list = cart?.products
             })
         } else {
             list.push({...data[0]})
-            const wish = new wishlist({
+            const wish = new Wishlist({
                 userId: userId,
                 products: list
             }).save()

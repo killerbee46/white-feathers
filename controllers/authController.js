@@ -82,7 +82,7 @@ export const loginController = async (req, res) => {
     if (!user) {
       return res.status(409).send({
         success: false,
-        message: "Email is not registerd",
+        message: "Email is not registered",
       });
     }
 
