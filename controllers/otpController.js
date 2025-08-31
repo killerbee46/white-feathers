@@ -99,17 +99,19 @@ export const createOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
     try {
-        const { email, password, phone } = req?.body;
+        const { email:em, password } = req?.body;
+        const email = em?.toLowerCase()
 
         //validation
-        if (!(email || phone) || !password) {
+        if (!email || !password) {
             return res.status(409).send({
                 status: 'failed',
                 message: "Email/phone and Password both are required",
             });
         }
 
-        const otpExists = await OTP.findOne({ phone })
+        const user = await userModel.findOne({ email },"phone")
+        const otpExists = await OTP.findOne({ phone:user?.phone })
         const otp = generateOTP()
         const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
 

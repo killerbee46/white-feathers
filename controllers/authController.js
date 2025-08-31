@@ -10,8 +10,7 @@ export const registerController = async (req, res) => {
   try {
     const { otp, data } = req?.body;
     const { email, phone } = data;
-    const exisitingUser = await userModel.findOne({ email });
-    const exisitingPhone = await userModel.findOne({ phone });
+    const exisitingUser = await userModel.findOne({ $or: [{ phone }, { email }] });
 
     if (exisitingUser) {
       return res.status(409).send({
@@ -68,18 +67,18 @@ export const registerController = async (req, res) => {
 //POST LOGIN
 export const loginController = async (req, res) => {
   try {
-    const { email: em, password, phone } = req.body;
+    const { email: em, password } = req.body;
     const email = em?.toLowerCase()
 
     //validation
-    if (!(email || phone) || !password) {
+    if (!email || !password) {
       return res.status(409).send({
         status: "failed",
         message: "Email/phone and Password both are required",
       });
     }
     //check user
-    const user = await userModel.findOne({ $or:[{phone},{email}] }, "name password address phone otp");
+    const user = await userModel.findOne({ $or: [{ email: email }, { phone: email }] }, "name password address phone otp");
     if (!user) {
       return res.status(409).send({
         success: false,
