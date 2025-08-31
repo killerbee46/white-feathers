@@ -6,7 +6,7 @@ import { hashPassword } from "../helpers/authHelper.js";
 
 export const createOtp = async (req, res) => {
     try {
-        const { name, email:em, password, phone, address } = req?.body;
+        const { name, email: em, password, phone, address } = req?.body;
         const email = em?.toLowerCase()
         //validations
         if (!name) {
@@ -64,8 +64,8 @@ export const createOtp = async (req, res) => {
                 otp_expiry: newToken.otp_expiry,
                 data: {
                     ...req?.body,
-                    email:email,
-                    password:hashedPassword
+                    email: email,
+                    password: hashedPassword
                 }
             })
         }
@@ -82,8 +82,8 @@ export const createOtp = async (req, res) => {
                 otp_expiry: token?.otp_expiry,
                 data: {
                     ...req?.body,
-                    email:email,
-                    password:hashedPassword
+                    email: email,
+                    password: hashedPassword
                 }
             })
         }
@@ -100,12 +100,13 @@ export const createOtp = async (req, res) => {
 export const verifyOtp = async (req, res) => {
     try {
         const { email, password, phone } = req?.body;
-        //validations
-        if (!email) {
-            return res.send({ error: "Email is Required" });
-        }
-        if (!password) {
-            return res.send({ error: "Password is Required" });
+
+        //validation
+        if (!(email || phone) || !password) {
+            return res.status(409).send({
+                status: 'failed',
+                message: "Email/phone and Password both are required",
+            });
         }
 
         const otpExists = await OTP.findOne({ phone })
@@ -166,11 +167,11 @@ export const changePasswordOtp = async (req, res) => {
             return res.send({ error: "Phone is Required" });
         }
 
-        
+
         const otpExists = await OTP.findOne({ phone })
         const otp = generateOTP()
         const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
-        
+
         if (otpExists) {
             await fetch(sparrowUrl)
             const newToken = await OTP.findByIdAndUpdate(
@@ -182,7 +183,7 @@ export const changePasswordOtp = async (req, res) => {
                 },
                 { new: true }
             );
-            
+
             return res.status(201).json({
                 message: "OTP sent to your phone please verify to proceed further",
                 otp_expiry: newToken.otp_expiry,

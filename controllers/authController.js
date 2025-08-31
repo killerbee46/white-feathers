@@ -41,7 +41,7 @@ export const registerController = async (req, res) => {
       const user = await new userModel({
         ...data,
         role: 1,
-        otp:otp
+        otp: otp
       }).save();
       return res.status(201).send({
         success: true,
@@ -68,21 +68,22 @@ export const registerController = async (req, res) => {
 //POST LOGIN
 export const loginController = async (req, res) => {
   try {
-    const { email:em, password } = req.body;
+    const { email: em, password, phone } = req.body;
     const email = em?.toLowerCase()
+
     //validation
-    if (!email || !password) {
+    if (!(email || phone) || !password) {
       return res.status(409).send({
-        success: false,
-        message: "Invalid email or password",
+        status: "failed",
+        message: "Email/phone and Password both are required",
       });
     }
     //check user
-    const user = await userModel.findOne({ email }, "name password address phone otp");
+    const user = await userModel.findOne({ $or:[{phone},{email}] }, "name password address phone otp");
     if (!user) {
       return res.status(409).send({
         success: false,
-        message: "Email is not registered",
+        message: "User not registered",
       });
     }
 
@@ -123,7 +124,7 @@ export const loginController = async (req, res) => {
 export const unverifiedLoginController = async (req, res) => {
   try {
     const { otp, data } = req?.body;
-    const { phone, email:em } = data;
+    const { phone, email: em } = data;
     const email = em?.toLowerCase()
     const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
     const user = await userModel.findOne({ email }, "")
@@ -171,7 +172,7 @@ export const unverifiedLoginController = async (req, res) => {
 
 export const forgotPasswordController = async (req, res) => {
   try {
-     const { otp, password, data } = req?.body;
+    const { otp, password, data } = req?.body;
     const { phone } = data;
     const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
     const user = await userModel.findOne({ phone }, "")
@@ -188,11 +189,11 @@ export const forgotPasswordController = async (req, res) => {
 
     if (otpMatch) {
       const hashed = await hashPassword(password);
-    await userModel.findByIdAndUpdate(user._id, { password: hashed });
-    return res.status(200).send({
-      success: true,
-      message: "Password Reset Successfully",
-    });
+      await userModel.findByIdAndUpdate(user._id, { password: hashed });
+      return res.status(200).send({
+        success: true,
+        message: "Password Reset Successfully",
+      });
     }
     else {
       return res.status(409).json({
@@ -200,7 +201,7 @@ export const forgotPasswordController = async (req, res) => {
         message: "Otp did not Match"
       })
     }
-    
+
   } catch (error) {
     console.log(error);
     res.status(500).send({
