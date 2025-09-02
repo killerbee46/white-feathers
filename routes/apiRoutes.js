@@ -12,6 +12,8 @@ import reviewRoutes from "./reviewRoutes.js";
 import currencyRoutes from "./currencyRoutes.js";
 import notificationRoutes from "./notificationRoutes.js";
 import { calculatePrice } from "../controllers/priceCalculatorController.js";
+import materialRoutes from "./materialRoutes.js";
+import metalRoutes from "./metalRoutes.js";
 
 const router = express.Router();
 
@@ -35,5 +37,7 @@ router.use("/reviews", reviewRoutes);
 router.post("/price-calculator", calculatePrice)
 router.use("/currency", currencyRoutes)
 router.use("/notifications", notificationRoutes)
+router.use("/materials", materialRoutes);
+router.use("/metals", metalRoutes);
 
 export default router

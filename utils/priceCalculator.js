@@ -11,7 +11,7 @@ export const priceCalculator = (data) => {
       if (d?.unit === "gm" || d?.unit === "tola") {
         pricePerGram = (d?.unit === "gm") ?
           d?.metalId?.unitPrice / 11.664 :
-          d?.metalId?.unitPrice
+          (d?.unit === "tola") ? d?.metalId?.unitPrice : 0
 
         makingChargePerGram = (d?.makingUnit === "gm") ?
           d?.makingCharge : (d?.makingUnit === "percent") ?
