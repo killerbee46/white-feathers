@@ -55,7 +55,9 @@ app.get("/payment-test", function (req, res) {
 });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use("/api",selfFulfillingProphecy, apiRoutes);
+app.use("/api",
+  // selfFulfillingProphecy, 
+  apiRoutes);
 app.use("/upload", uploadRoutes)
 
 //PORT
