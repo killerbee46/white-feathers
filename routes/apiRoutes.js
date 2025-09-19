@@ -18,7 +18,7 @@ import metalRoutes from "./metalRoutes.js";
 const router = express.Router();
 
 router.get("/",(req, res)=>{
-    return res.send(200, { 
+    return res.status(200).send({ 
         message:"Welcome to White Feather's Jewellery's Api",
         user:req?.user
     })
