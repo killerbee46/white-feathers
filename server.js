@@ -11,6 +11,7 @@ import path from "path";
 import swaggerJSDoc from 'swagger-jsdoc';
 import { tempDbConnect } from "./config/tempDb.js";
 import { selfFulfillingProphecy } from "./utils/selfFulfillingProphecy.js";
+import schedule from 'node-schedule';
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename);
 
@@ -50,15 +51,19 @@ app.get("/", (req, res) => {
   res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>`)
 });
 
-app.get("/payment-test", function (req, res) {
-  res.sendFile(__dirname + "/test.html");
-});
+// app.get("/payment-test", function (req, res) {
+//   res.sendFile(__dirname + "/test.html");
+// });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",
-  selfFulfillingProphecy, 
+  // selfFulfillingProphecy, 
   apiRoutes);
 app.use("/upload", uploadRoutes)
+
+schedule.scheduleJob({hour:11,minute:5}, function(){
+    selfFulfillingProphecy()
+});
 
 //PORT
 const PORT = process.env.PORT || 8080;
