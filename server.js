@@ -12,6 +12,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import { tempDbConnect } from "./config/tempDb.js";
 import { selfFulfillingProphecy } from "./utils/selfFulfillingProphecy.js";
 import schedule from 'node-schedule';
+import dayjs from "dayjs";
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename);
 
@@ -61,7 +62,7 @@ app.use("/api",
   apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({hour:11,minute:5}, function(){
+schedule.scheduleJob({hour:5,minute:42,tz:"Asia/Kathmandu"}, function(){
     selfFulfillingProphecy()
 });
 
