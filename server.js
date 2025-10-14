@@ -10,9 +10,10 @@ import swaggerUi from 'swagger-ui-express';
 import path from "path";
 import swaggerJSDoc from 'swagger-jsdoc';
 import { tempDbConnect } from "./config/tempDb.js";
-import { selfFulfillingProphecy } from "./utils/selfFulfillingProphecy.js";
 import schedule from 'node-schedule';
-import dayjs from "dayjs";
+import fetchTodaysGoldSilverRates from "./utils/goldRate.js";
+import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
+import { updateCurrency } from "./utils/updateCurrency.js";
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename);
 
@@ -29,7 +30,7 @@ const options = {
   apis: ['routes/*.js'],
 };
 
-const swaggerSpec = swaggerJSDoc(options);  
+const swaggerSpec = swaggerJSDoc(options);
 
 //configure env
 dotenv.config();
@@ -57,13 +58,16 @@ app.get("/", (req, res) => {
 // });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use("/api",
-  // selfFulfillingProphecy, 
-  apiRoutes);
+app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({hour:5,minute:42,tz:"Asia/Kathmandu"}, function(){
-    selfFulfillingProphecy()
+schedule.scheduleJob({ hour: 4, minute: 0, tz: "Asia/Kathmandu" }, async function () {
+  updateCurrency()
+});
+
+schedule.scheduleJob({ hour: 11, minute: 5, tz: "Asia/Kathmandu" }, async function () {
+  const rates = await fetchTodaysGoldSilverRates();
+  updateMaterialPrice(rates)
 });
 
 //PORT
@@ -73,4 +77,5 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(
     `Server Running on ${process.env.DEV_MODE} mode on port ${PORT}`.bgCyan.white
-  );});
+  );
+});
