@@ -18,12 +18,6 @@ export const registerController = async (req, res) => {
         message: "Already Register please login",
       });
     }
-    if (exisitingPhone) {
-      return res.status(409).send({
-        success: false,
-        message: "Phone already registered to another user",
-      });
-    }
     const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
     const expired = (dayjs() - dayjs(otpData.otp_expiry)) > 0
 

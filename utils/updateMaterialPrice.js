@@ -3,7 +3,7 @@ import { sequelize } from "../config/tempDb.js";
 
 export const updateMaterialPrice = (rates) => {
     const materialRates = rates?.rates
-      Object.keys(materialRates).map(async(key) => {
+      Object?.keys(materialRates)?.map(async(key) => {
         console.log(key, "rate ")
         let updateRateQuery = ""
         switch (key) {

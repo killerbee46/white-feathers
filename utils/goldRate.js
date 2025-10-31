@@ -8,10 +8,7 @@ export async function fetchTodaysGoldSilverRates() {
   const url = "https://www.fenegosida.org/rate-history.php";
 
   try {
-    const { data: html } = await axios.get(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
-      timeout: 10000,
-    });
+    const { data: html } = await axios.get(url);
 
     const $ = cheerio.load(html);
     const text = $.text();

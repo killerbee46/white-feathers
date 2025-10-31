@@ -61,13 +61,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({ hour: 4, minute: 0, tz: "Asia/Kathmandu" }, async function () {
-  updateCurrency()
-});
-
-schedule.scheduleJob({ hour: 11, minute: 5, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 12, minute: 1, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
+  updateCurrency()
 });
 
 //PORT
