@@ -52,11 +52,11 @@ export const getProduct = async (req, res) => {
 
       const wishlist = await Wishlist.findOne({ userId: userId }, "products")
       const cart = await Cart.findOne({ userId: userId }, "products")
-      existingWishlist = wishlist?.products?.map((w) => w?.id)
-      existingCart = cart?.products?.map((c) => c?.id)
+      existingWishlist = wishlist?.products?.map((w) => w?.id) || []
+      existingCart = cart?.products?.map((c) => c?.id) || []
     }
-    const wishListCheck = existingWishlist.length !== 0 ? ` IF(p.id_pack in (${existingWishlist?.join(",")}), true, false) as wishlist, ` : ""
-    const cartCheck = existingCart.length !== 0 ? ` IF(p.id_pack in (${existingCart?.join(",")}), true, false) as cart, ` : ""
+    const wishListCheck = existingWishlist?.length !== 0 ? ` IF(p.id_pack in (${existingWishlist?.join(",")}), true, false) as wishlist, ` : ""
+    const cartCheck = existingCart?.length !== 0 ? ` IF(p.id_pack in (${existingCart?.join(",")}), true, false) as cart, ` : ""
     const query = sqlProductFetch(`p.*,` + wishListCheck + cartCheck) + ` and p.id_pack = ${req?.params?.id}`
     const [data] = await sequelize.query(query)
 

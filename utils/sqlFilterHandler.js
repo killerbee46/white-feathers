@@ -1,4 +1,4 @@
-const dynamic_price = ' (IF(p.pmt_id <= 9, pr.rate/11.664 * p.weight, pr.rate * p.weight) + p.dc_rate * p.dc_qty + IF(p.mk_pp, p.mk_pp, p.mk_gm * p.weight) ) '
+const dynamic_price = '(pr.rate/11.664 * p.weight + p.dc_rate * p.dc_qty + IF(p.mk_pp, p.mk_pp, p.mk_gm * p.weight) )'
 
 export const sqlFilterHandler = (filters) => {
     let query = "";
@@ -20,8 +20,8 @@ export const sqlFilterHandler = (filters) => {
     if (filters.sortBy === "price-htl") query = query + ` order by ${dynamic_price} desc `;
     if (filters.sortBy === "price-lth") query = query + ` order by ${dynamic_price} `;
     if (filters.sortBy === "discounted") query = query + ` and p.offer > 0 `;
+    if (filters.order && !(filters.sortBy && filters.sortBy !== "discounted")) query = query + ` order by p.id_pack ${filters?.order} `;
     if (filters.limit) query = query + ` limit ${filters?.limit} `;
     if (filters.offset) query = query + ` offset ${filters?.offset} `;
-
     return query;
 }
