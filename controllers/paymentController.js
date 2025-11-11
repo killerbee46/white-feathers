@@ -30,8 +30,8 @@ const { products, productId } = req?.body
       finalPrice:(finalPrice).toFixed(2),
     })
 
-    const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id) VALUES (
-    '${orderDetails}','${user?.name}','${user?.phone}','${user?.email}','${user?.address}','${dayjs().unix()}',1
+    const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id,msg,ip,mode,p_id) VALUES (
+    '${orderDetails}','${user?.name}','${user?.phone}','${user?.email}','${user?.address}','${dayjs().unix()}',1,'esewa','','3',0
     );`
 
     let tId = ''

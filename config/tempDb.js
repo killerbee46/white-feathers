@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 
-export const sequelize = new Sequelize("whitefeat_wf_new","whitefeat_web","P@ssw00rd",{
-host     : '65.0.232.176',
+export const sequelize = new Sequelize("whitefeat_wf_new","whitefeat_killerbee","P@ssw00rd",{
+host     : 'localhost',
 dialect : 'mysql'
 }); 
 
