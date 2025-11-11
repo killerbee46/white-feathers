@@ -68,7 +68,7 @@ schedule.scheduleJob({ hour: 12, minute: 1, tz: "Asia/Kathmandu" }, async functi
 });
 
 //PORT
-const PORT = process.env.PORT || 8080;
+const PORT = 60000;
 
 //run listen
 app.listen(PORT, () => {
