@@ -121,10 +121,9 @@ export const createOrder = async (req, res) => {
       totalDiscount: (totalDiscount).toFixed(),
       finalPrice: (finalPrice).toFixed(),
     })
-
-    const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id, checkout) VALUES (
-    '${orderDetails}','${user?.name}','${user?.phone}','${user?.email}','${user?.address}','${dayjs().unix()}',1,1
-    );`
+    const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id,msg,ip,mode,p_id,p_amount) VALUES (
+        '${orderDetails}','${user?.name}','${user?.phone}','${user?.email}','${user?.address}','${dayjs().unix()}',1,'esewa','','3',0,${(finalPrice).toFixed(2)}
+        );`
     const [orderCreate] = await sequelize.query(orderQuery)
 
     return res.status(201).json({
