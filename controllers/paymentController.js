@@ -116,8 +116,6 @@ export const failedEsewaPayment = async (req, res) => {
     
     // Find the purchased item using the transaction UUID
     const orderQuery = `delete from cart_book
-SET checkout = 1, esewa_code = '${paymentInfo.decodedData.transaction_code}',esewa_verify=1, p_date = ${dayjs().format("YYYY-MM-DD")},
-p_amount = ${paymentInfo.decodedData.total_amount}
 WHERE tracking_code = ${paymentInfo.decodedData.transaction_uuid}`
     const [orderData] = await sequelize.query(orderQuery)
     // PurchasedItem.findById(
@@ -134,7 +132,7 @@ WHERE tracking_code = ${paymentInfo.decodedData.transaction_uuid}`
       dataFromVerificationReq: paymentInfo,
       apiQueryFromUser: req.query,
       paymentGateway: "esewa",
-      status: "success",
+      status: "failed",
     });
 
 
