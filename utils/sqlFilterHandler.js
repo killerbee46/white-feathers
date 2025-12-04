@@ -1,4 +1,4 @@
-const dynamic_price = '(pr.rate/11.664 * p.weight + p.dc_rate * p.dc_qty + IF(p.mk_pp, p.mk_pp, p.mk_gm * p.weight) )'
+const dynamic_price = '(IF(isFixedPrice,p.price,(IF(p.pmt_id = 11,pr.rate,pr.rate / 11.664) * p.weight +(p.dc_rate * p.dc_qty) +(p.mk_pp + p.mk_gm * p.weight +(p.jarti / 100) *(pm.price * pr.purity / 100) * p.weight))) - IF(isFixedPrice,0,(IF(p.offer > 0,((IF(p.pmt_id = 11,pr.rate,pr.rate / 11.664) * p.weight +(p.dc_rate * p.dc_qty) +( p.mk_pp + p.mk_gm * p.weight +(p.jarti / 100) *(pm.price * pr.purity / 100) * p.weight)) *(p.offer / 100)),0))))'
 
 export const sqlFilterHandler = (filters) => {
     let query = "";
@@ -14,7 +14,7 @@ export const sqlFilterHandler = (filters) => {
     if (filters.maxWeight) query = query + ` and weight < ${filters?.maxWeight} `;
     if (filters.metal === "gold") query = query + ` and p.pm_id = 2 or p.pmt_id >= 1 `;
     if (filters.metal === "silver") query = query + ` and p.pm_id = 3 or p.pmt_id >= 10 `;
-    if (filters.metal === "diamond") query = query + ` and p.pm_id = 1 `;
+    if (filters.metal === "diamond") query = query + ` and p.dc_qty > 0 `;
     if (filters.metal === "rhodium") query = query + ` and p.pm_id = 4 `;
     if (filters.sortBy === "latest") query = query + `  order by p.id_pack desc `;
     if (filters.sortBy === "price-htl") query = query + ` order by ${dynamic_price} desc `;
