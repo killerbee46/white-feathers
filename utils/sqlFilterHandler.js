@@ -16,10 +16,11 @@ export const sqlFilterHandler = (filters) => {
     if (filters.metal === "silver") query = query + ` and p.pm_id = 3 or p.pmt_id >= 10 `;
     if (filters.metal === "diamond") query = query + ` and p.pm_id = 1 `;
     if (filters.metal === "rhodium") query = query + ` and p.pm_id = 4 `;
-    if (filters.sortBy === "latest") query = query + `  order by id desc `;
+    if (filters.sortBy === "latest") query = query + `  order by p.id_pack desc `;
     if (filters.sortBy === "price-htl") query = query + ` order by ${dynamic_price} desc `;
     if (filters.sortBy === "price-lth") query = query + ` order by ${dynamic_price} `;
     if (filters.sortBy === "discounted") query = query + ` and p.offer > 0 `;
+    if (!filters.sortBy && !filters.order) query = query + ` order by p.id_pack desc `;
     if (filters.order && !(filters.sortBy && filters.sortBy !== "discounted")) query = query + ` order by p.id_pack ${filters?.order} `;
     if (filters.limit) query = query + ` limit ${filters?.limit} `;
     if (filters.offset) query = query + ` offset ${filters?.offset} `;

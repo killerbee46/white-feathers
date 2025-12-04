@@ -53,15 +53,11 @@ app.get("/", (req, res) => {
   res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>`)
 });
 
-// app.get("/payment-test", function (req, res) {
-//   res.sendFile(__dirname + "/test.html");
-// });
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 10, minute: 10, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
   updateCurrency()
