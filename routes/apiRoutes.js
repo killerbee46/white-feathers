@@ -14,7 +14,6 @@ import notificationRoutes from "./notificationRoutes.js";
 import { calculatePrice } from "../controllers/priceCalculatorController.js";
 import materialRoutes from "./materialRoutes.js";
 import metalRoutes from "./metalRoutes.js";
-import { congratulateUsers, consoleUsers } from "../controllers/offerConfirmController.js";
 
 const router = express.Router();
 
@@ -40,8 +39,5 @@ router.use("/currency", currencyRoutes)
 router.use("/notifications", notificationRoutes)
 router.use("/materials", materialRoutes);
 router.use("/metals", metalRoutes);
-
-router.get("/congratulateUsers", congratulateUsers);
-router.get("/consoleUsers", consoleUsers);
 
 export default router
