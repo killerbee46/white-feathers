@@ -57,7 +57,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({ hour: 12, minute: 52, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 0, minute: 54, tz: "Asia/Kathmandu" }, async function () {
   const query = "Update package set stock = 10 where id_pack = 1849"
       const [data] = await sequelize.query(query)
 });
