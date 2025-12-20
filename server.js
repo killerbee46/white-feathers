@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
 import path from "path";
 import swaggerJSDoc from 'swagger-jsdoc';
-import { tempDbConnect } from "./config/tempDb.js";
+import { sequelize, tempDbConnect } from "./config/tempDb.js";
 import schedule from 'node-schedule';
 import fetchTodaysGoldSilverRates from "./utils/goldRate.js";
 import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
@@ -57,7 +57,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({ hour: 0, minute: 54, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 0, minute: 56, tz: "Asia/Kathmandu" }, async function () {
   const query = "Update package set stock = 10 where id_pack = 1849"
       const [data] = await sequelize.query(query)
 });
