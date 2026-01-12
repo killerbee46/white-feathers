@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 import OTP from "../models/OTP.js";
 import { generateOTP } from "../utils/generateOTP.js";
-import userModel from "../models/userModel.js";
 import { hashPassword } from "../helpers/authHelper.js";
+import User from "../models/User.js";
+import { Op } from "sequelize";
 
 export const createOtp = async (req, res) => {
     try {
@@ -11,9 +12,6 @@ export const createOtp = async (req, res) => {
         //validations
         if (!name) {
             return res.send({ error: "Name is Required" });
-        }
-        if (!email) {
-            return res.send({ error: "Email is Required" });
         }
         if (!password) {
             return res.send({ error: "Password is Required" });
@@ -25,13 +23,13 @@ export const createOtp = async (req, res) => {
             return res.send({ error: "Address is Required" });
         }
         //check user
-        const exisitingUser = await userModel.findOne({ email });
-        const exisitingPhone = await userModel.findOne({ phone });
+        const exisitingUser = await User.findOne({ where: { email } }, { attributes:{include:[]} });
+        const exisitingPhone = await User.findOne({ where: { phone } }, { attributes:{include:[]} });
 
         if (exisitingUser) {
             return res.status(409).send({
                 success: false,
-                message: "Already Register please login",
+                message: "Email Already Registered please login",
             });
         }
         if (exisitingPhone) {
@@ -43,21 +41,17 @@ export const createOtp = async (req, res) => {
 
         const hashedPassword = await hashPassword(password);
 
-        const otpExists = await OTP.findOne({ phone })
+        const otpExists = await OTP.findOne({ where: { phone } })
         const otp = generateOTP()
         const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
 
         if (otpExists) {
             await fetch(sparrowUrl)
-            const newToken = await OTP.findByIdAndUpdate(
-                otpExists?._id,
-                {
-                    phone: phone,
-                    otp: otp,
-                    otp_expiry: dayjs().add(5, 'minutes')
-                },
-                { new: true }
-            );
+            const newToken = await otpExists.update({
+                phone: phone,
+                otp: otp,
+                otp_expiry: dayjs().add(5, 'minutes')
+            })
 
             res.status(201).json({
                 message: "New OTP sent to your phone please verify to proceed further",
@@ -71,11 +65,11 @@ export const createOtp = async (req, res) => {
         }
         else {
             await fetch(sparrowUrl)
-            const token = await new OTP({
+            const token = await OTP.create({
                 phone: phone,
                 otp: otp,
                 otp_expiry: dayjs().add(5, 'minutes')
-            }).save();
+            });
 
             res.status(201).json({
                 message: "OTP sent to your phone please verify to proceed further",
@@ -99,7 +93,7 @@ export const createOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
     try {
-        const { email:em, password } = req?.body;
+        const { email: em, password } = req?.body;
         const email = em?.toLowerCase()
 
         //validation
@@ -110,21 +104,25 @@ export const verifyOtp = async (req, res) => {
             });
         }
 
-        const user = await userModel.findOne({ email },"phone")
-        const otpExists = await OTP.findOne({ phone:user?.phone })
+        const user = await User.findOne({ where:{[Op.or]: [
+              {
+                phone: email
+              }, {
+                email: email
+              }
+            ]}})
+        const otpExists = await OTP.findOne({where:{ phone: user?.phone }},{attributes:{include:["otp","otp_expiry"]}})
         const otp = generateOTP()
-        const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
+        const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${user?.phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
 
         if (otpExists) {
             await fetch(sparrowUrl)
-            const newToken = await OTP.findByIdAndUpdate(
-                otpExists?._id,
+            const newToken = await otpExists.update(
                 {
-                    phone: phone,
+                    phone: user?.phone,
                     otp: otp,
                     otp_expiry: dayjs().add(5, 'minutes')
-                },
-                { new: true }
+                }
             );
 
             res.status(201).json({
@@ -170,20 +168,18 @@ export const changePasswordOtp = async (req, res) => {
         }
 
 
-        const otpExists = await OTP.findOne({ phone })
+        const otpExists = await OTP.findOne({where: {phone} })
         const otp = generateOTP()
         const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${phone}&text=White Feather's Login - OTP: ${otp}&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
 
         if (otpExists) {
             await fetch(sparrowUrl)
-            const newToken = await OTP.findByIdAndUpdate(
-                otpExists?._id,
+            const newToken = await otpExists.update(
                 {
                     phone: phone,
                     otp: otp,
                     otp_expiry: dayjs().add(5, 'minutes')
-                },
-                { new: true }
+                }
             );
 
             return res.status(201).json({
@@ -196,11 +192,11 @@ export const changePasswordOtp = async (req, res) => {
         }
         else {
             await fetch(sparrowUrl)
-            const token = await new OTP({
+            const token = await OTP.create({
                 phone: phone,
                 otp: otp,
                 otp_expiry: dayjs().add(5, 'minutes')
-            }).save();
+            });
 
             res.status(201).json({
                 message: "OTP sent to your phone please verify to proceed further",

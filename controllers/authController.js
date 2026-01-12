@@ -1,25 +1,34 @@
 import dayjs from "dayjs";
 import OTP from "../models/OTP.js";
-import userModel from "../models/userModel.js";
-
+import User from '../models/User.js';
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
 import { verifyOtp } from "./otpController.js";
+import { Op } from "sequelize";
 
 export const registerController = async (req, res) => {
   try {
     const { otp, data } = req?.body;
     const { email, phone } = data;
-    const exisitingUser = await userModel.findOne({ $or: [{ phone }, { email }] });
-
-    if (exisitingUser) {
-      return res.status(409).send({
-        success: false,
-        message: "Already Register please login",
-      });
-    }
-    const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
+    //check user
+        const exisitingUser = await User.findOne({ where:{email} });
+        const exisitingPhone = await User.findOne({ where:{phone} });
+        //exisiting user
+        if (exisitingUser) {
+          return res.status(409).send({
+            success: false,
+            message: "Already Register please login",
+          });
+        }
+        if (exisitingPhone) {
+          return res.status(409).send({
+            success: false,
+            message: "Phone already registered to another user",
+          });
+        }
+    const otpData = await OTP.findOne({where:{phone} }, "otp otp_expiry")
     const expired = (dayjs() - dayjs(otpData.otp_expiry)) > 0
+    
 
     if (expired) {
       return res.status(400).send({
@@ -31,11 +40,11 @@ export const registerController = async (req, res) => {
     const otpMatch = otpData.otp == otp;
 
     if (otpMatch) {
-      const user = await new userModel({
+      const user = await User.create({
         ...data,
         role: 1,
         otp: otp
-      }).save();
+      });
       return res.status(201).send({
         success: true,
         message: "User Register Successfully",
@@ -72,7 +81,14 @@ export const loginController = async (req, res) => {
       });
     }
     //check user
-    const user = await userModel.findOne({ $or: [{ email: email }, { phone: email }] }, "name password address phone otp");
+    const user = await User.findOne({ where:{[Op.or]: [
+      {
+        phone: email
+      }, {
+        email: email
+      }
+    ]}, attributes:{include:['otp']} });
+    
     if (!user) {
       return res.status(409).send({
         success: false,
@@ -88,7 +104,7 @@ export const loginController = async (req, res) => {
       });
     }
     //token
-    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET);
+    const token = JWT.sign({ id: user.c_id }, process.env.JWT_SECRET);
 
     if (!user.otp) {
       req.body = {
@@ -119,9 +135,15 @@ export const unverifiedLoginController = async (req, res) => {
     const { otp, data } = req?.body;
     const { phone, email: em } = data;
     const email = em?.toLowerCase()
-    const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
-    const user = await userModel.findOne({ email }, "")
-    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET);
+    const otpData = await OTP.findOne({where:{phone}, attributes:{include:["otp","otp_expiry"]}})
+    const user = await User.findOne({where:{[Op.or]: [
+      {
+        phone: email
+      }, {
+        email: email
+      }
+    ]}, attributes:{include:[]} })
+    const token = JWT.sign({ id: user.c_id }, process.env.JWT_SECRET);
     const expired = (dayjs() - dayjs(otpData.otp_expiry)) > 0
     if (expired) {
       return res.status(400).send({
@@ -133,8 +155,7 @@ export const unverifiedLoginController = async (req, res) => {
     const otpMatch = otpData.otp == otp;
 
     if (otpMatch) {
-      await userModel.findByIdAndUpdate(
-        user?._id,
+      await user.update(
         {
           otp: otp
         })
@@ -167,8 +188,8 @@ export const forgotPasswordController = async (req, res) => {
   try {
     const { otp, password, data } = req?.body;
     const { phone } = data;
-    const otpData = await OTP.findOne({ phone: phone }, "otp otp_expiry")
-    const user = await userModel.findOne({ phone }, "")
+    const otpData = await OTP.findOne({where:{phone}, attributes:{include:["otp","otp_expiry"]}})
+    const user = await User.findOne({ where: {phone}, attributes:{include:[]} })
     const expired = (dayjs() - dayjs(otpData.otp_expiry)) > 0
 
     if (expired) {
@@ -182,7 +203,7 @@ export const forgotPasswordController = async (req, res) => {
 
     if (otpMatch) {
       const hashed = await hashPassword(password);
-      await userModel.findByIdAndUpdate(user._id, { password: hashed });
+      await user.update({ password: hashed });
       return res.status(200).send({
         success: true,
         message: "Password Reset Successfully",
@@ -219,32 +240,30 @@ export const testController = (req, res) => {
 export const updateProfileController = async (req, res) => {
   try {
     const { name, password, address, phone } = req.body;
-    const user = await userModel.findById(req.user._id);
+    const user = await User.findByPk(req.user.id);
     //password
     if (password && password.length < 6) {
       return res.json({ error: "Password is required and 6 character long" });
     }
     const hashedPassword = password ? await hashPassword(password) : undefined;
-    const updatedUser = await userModel.findByIdAndUpdate(
-      req.user._id,
+    const updatedUser = await user.update(
       {
         name: name || user.name,
         password: hashedPassword || user.password,
         phone: phone || user.phone,
         address: address || user.address,
-      },
-      { new: true }
+      }
     );
     res.status(200).send({
       success: true,
-      message: "Profile Updated SUccessfully",
-      updatedUser,
+      message: "Profile Updated Successfully",
+      user,
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Update profile",
+      message: "Error While updating profile",
       error,
     });
   }

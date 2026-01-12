@@ -1,5 +1,5 @@
 import JWT from "jsonwebtoken";
-import userModel from "../models/userModel.js";
+import User from "../models/User.js";
 
 //Protected Routes token base
 export const requireSignIn = async (req, res, next) => {
@@ -56,7 +56,7 @@ export const checkForSignIn = async (req, res, next) => {
 //admin acceess
 export const isAdmin = async (req, res, next) => {
   try {
-    const user = await userModel.findById(req.user._id);
+    const user = await User.findByPk(req.user.id);
     if (user.role !== 3) {
       return res.status(401).send({
         success: false,

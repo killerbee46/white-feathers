@@ -1,25 +1,28 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
 
-const OTPSchema = new mongoose.Schema(
+const OTP = sequelize.define(
+  "OTP",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement:true,
+      primaryKey:true
+    },
     phone: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING,
+      allowNull: false
     },
     otp: {
-      type: String,
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull:false
     },
     otp_expiry: {
-      type: Date,
-      required: true,
-    },
-    data:{
-        type:Object,
+      type: DataTypes.DATE,
+      allowNull:false
     }
   },
-  { timestamps: true }
+  { timestamps: false }
 );
 
-export default mongoose.model("OTP", OTPSchema);
+export default OTP

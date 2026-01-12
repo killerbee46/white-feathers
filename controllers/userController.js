@@ -1,10 +1,10 @@
 import { hashPassword } from "../helpers/authHelper.js";
-import userModel from "../models/userModel.js"
+import User from "../models/User.js";
 
 export const getUsers = async (req, res) => {
   
   try {
-    const users = await userModel.find({}).select('-password');
+    const users = await User.findAll({attributes:{exclude:['pass','otp',"password"]}});
     res.status(200).json({
       status: 'success',
       message: "Users list fetched successfully",
@@ -22,9 +22,10 @@ export const getUsers = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const user = await userModel.findById(req.params.id).select('-password');
+    const user = await User.findByPk(req.params.id,{attributes:{exclude:["pass","otp","password"]}});
     res.status(200).send({
-      user
+      success: true,
+      data:user
     });
   } catch (error) {
     console.log(error);
@@ -38,7 +39,8 @@ export const getUser = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await userModel.findById(req?.user?._id).select('-password -otp');
+    const user = await User.findByPk(req.user.id,{attributes:{exclude:["pass","otp","password"]}});
+
     return res.status(200).json({
       status:'success',
       message: "Profile fetched successfully",
@@ -56,20 +58,25 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { name, address, password } = req?.body
-    const user = await userModel.findById(req.user._id);
+    const user = await User.findByPk(req.user.id);
     const hashedPassword = password ? await hashPassword(password) : undefined;
-    const updated = await userModel.findByIdAndUpdate(req?.user?._id,
+    const updated = await user.update(
       {
         name: name || user.name,
         password: hashedPassword || user.password,
         address: address || user.address,
-      },
-      { new: true }
+      }
     )
     return res.status(200).json({
       status: 'success',
       message: "User updated successfully",
-      updated
+      user:{
+        c_id:user?.c_id,
+        name:user?.name,
+        email:user?.email,
+        address:user?.address,
+        role:user?.role,
+      }
     });
   } catch (error) {
     console.log(error);
@@ -83,13 +90,10 @@ export const updateProfile = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { name, email, phone, address, role, image } = req.body;
+    const { name, email, phone, address, role, image,password } = req.body;
     //validations
     if (!name) {
       return res.send({ error: "Name is Required" });
-    }
-    if (!email) {
-      return res.send({ error: "Email is Required" });
     }
     if (!phone) {
       return res.send({ error: "Phone no is Required" });
@@ -97,17 +101,14 @@ export const createUser = async (req, res) => {
     if (!address) {
       return res.send({ error: "Address is Required" });
     }
-    if (!role) {
-      return res.send({ error: "Role is Required" });
-    }
     //check user
-    const exisitingUser = await userModel.findOne({ email });
-    const exisitingPhone = await userModel.findOne({ phone });
+    const exisitingUser = await User.findOne({where:{ email }});
+    const exisitingPhone = await User.findOne({where:{ phone }});
     //exisiting user
     if (exisitingUser) {
       return res.status(409).send({
         success: false,
-        message: "Already Register please login",
+        message: "User with same email already exists",
       });
     }
     if (exisitingPhone) {
@@ -119,7 +120,7 @@ export const createUser = async (req, res) => {
     //register user
     const hashedPassword = await hashPassword('password');
     //save
-    const user = await new userModel({
+    const user = await User.create({
       name,
       email:email.toLowerCase(),
       phone,
@@ -127,12 +128,17 @@ export const createUser = async (req, res) => {
       password: hashedPassword,
       role,
       image
-    }).save();
+    });
+
+    const sparrowUrl = new URL(`https://api.sparrowsms.com/v2/sms/?from=InfoAlert&to=${user?.phone}&text=White Feather's Jewellery - User Created: Email:${user?.phone} - Pass:password&token=v2_Nd8UndHle6pYCSWXvLjkjOChhNd.GIYi`);
+
+    if (user) {
+      await fetch(sparrowUrl)
+    }
 
     res.status(201).send({
       success: true,
-      message: "User Added Successfully",
-      user,
+      message: "User Added Successfully"
     });
   } catch (error) {
     console.log(error);
@@ -147,13 +153,13 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { email, phone } = req.body;
-    const registeredUser = await userModel.findOne({ email });
-    const registeredPhone = await userModel.findOne({ phone });
+    const registeredUser = await User.findOne({where:{ email }});
+    const registeredPhone = await User.findOne({where:{ phone }});
     //exisiting user
-    if (registeredUser && registeredUser._id != req.params.id) {
+    if (registeredUser && registeredUser.id != req.params.id) {
       return res.status(409).send({
         success: false,
-        message: "User with the same name already registered",
+        message: "User with the same email already registered",
       });
     }
     if (registeredPhone) {
@@ -164,10 +170,10 @@ export const updateUser = async (req, res) => {
     }
     // register user
     // save
-    const user = await userModel.findByIdAndUpdate(req.params.id, {
+    const user = await User.findByPk(req.params.id)
+     await user.update(req.params.id, {
       ...req.body
     })
-    await user.save();
 
     res.status(201).send({
       success: true,
@@ -184,7 +190,7 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    await userModel.findByIdAndDelete(req.params.id);
+    await User.destroy({where:{c_id:req.params.id}});
     res.status(200).send({
       success: true,
       message: "User Deleted successfully",

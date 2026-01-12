@@ -5,14 +5,14 @@ import { sqlProductFetch } from "../utils/sqlProductFetch.js";
 
 export const getCart = async (req, res) => {
     try {
-        const userId = req?.user?._id
-        const cart = await Cart.findOne({ userId: userId }, 'products')
+        const userId = req?.params?.id
+        const cart = await Cart.findOne({ userId: userId })
         let finalPrice = 0
         let discount = 0
-        cart?.products?.map((p)=> {
-            finalPrice += (p?.dynamic_price * p?.quantity)
-            discount += (p?.discount * p?.quantity)
-        })
+        // cart?.products?.map((p)=> {
+        //     finalPrice += (p?.dynamic_price * p?.quantity)
+        //     discount += (p?.discount * p?.quantity)
+        // })
         return res.status(200).json({
             status: 'success',
             message: "Cart fetched successfully",
@@ -38,9 +38,9 @@ export const getCart = async (req, res) => {
 export const addCart = async (req, res) => {
     try {
         const { productId } = req.params;
-        const userId = req?.user?._id
-        const cart = await Cart.findOne({ userId: userId })
-        const wishlist = await Wishlist.findOne({ userId: userId })
+        const userId = 119
+        const cart = await Cart.find({ userId: userId })
+        // const wishlist = await Wishlist.findOne({ userId: userId })
         req.body.userId = userId
         let list = []
 
@@ -50,15 +50,15 @@ export const addCart = async (req, res) => {
         if (!productId) {
             return res.send({ error: "Please select a product to add" });
         }
-        if(wishlist){
-            const existingWishlist = wishlist?.products?.map((p)=> p?.id )
-            if (existingWishlist.includes(parseInt(productId))) {
-                return res.status(409).json({
-                    status: 'failed',
-                    message: 'Product is in the wishlist'
-                })
-            }
-        }
+        // if(wishlist){
+        //     const existingWishlist = wishlist?.products?.map((p)=> p?.id )
+        //     if (existingWishlist.includes(parseInt(productId))) {
+        //         return res.status(409).json({
+        //             status: 'failed',
+        //             message: 'Product is in the wishlist'
+        //         })
+        //     }
+        // }
 
         if (cart) {
             list = cart?.products

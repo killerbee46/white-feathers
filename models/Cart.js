@@ -1,15 +1,28 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
+import User from "./User.js";
 
-const CartSchema = new mongoose.Schema(
+const Cart = sequelize.define(
+  "cart",
   {
-    userId: {
-      type: String,
+    userId:{
+        type: DataTypes.BIGINT,
     },
-    products: { 
-        type: [Object]
+    products: {
+      type: [DataTypes.INTEGER],
+      allowNull: false,
     }
   },
-  { timestamps: true }
+  { 
+    freezeTableName:true,
+    timestamps: false 
+  }
 );
+// Cart.hasOne(User,{
+//   foreignKey:'userId',
+//   onDelete: 'RESTRICT',
+//   onUpdate: 'RESTRICT'
+// })
+// User.belongsTo(Cart)
 
-export default mongoose.model("Carts", CartSchema);
+export default Cart
