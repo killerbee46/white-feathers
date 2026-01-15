@@ -1,31 +1,29 @@
-import mongoose from 'mongoose';
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
 
-const metalSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-
+const Metal = sequelize.define(
+  "Metal",
+  {
+    pmt_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement:true
+    },
+    pmt_name:{
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    purity:{
+      type: DataTypes.INTEGER
+    },
+    pm_id:{
+      type: DataTypes.INTEGER
+    }
   },
-  type: {
-    type: String,
-    required: true
-  },
-  purityPercentage: {
-    type: Number,
-    required: true
-  },
-  basePricePerGram: {
-    type: Number,
-  },
-  unitPrice: {
-    type: Number
-  },
-  materialid: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Material',
-    required: true
+  {
+    tableName: 'package_metal',
+    timestamps: false
   }
-}, { timestamps: true });
+)
 
-const Metal = mongoose.model('Metal', metalSchema);
-export default Metal;
+export default Metal

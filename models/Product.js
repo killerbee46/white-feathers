@@ -1,60 +1,130 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
+import Metal from "./Metal.js";
+import PackageSlider from "./PackageSlider.js";
 
-// interface materialsType {
-//   materialId:String;
-//   metalId?:String;
-//   weight:Number;
-//   unit:"gm"|"tola"|"carat"|"cent";
-//   makingCharge?:Number;
-//   makingUnit?:"gm"|"tola"|"percent"
-// }
-
-const productSchema = new mongoose.Schema(
+const Product = sequelize.define(
+  "Product",
   {
-    name: {
-      type: String,
-      required: true,
+    id_pack: {
+      type: DataTypes.INTEGER,
+      primaryKey: true
     },
-    materials:{
-      type:[Object],
+    p_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    p_des: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    p_text: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    isFixedPrice: {
+      type: DataTypes.STRING,
+    },
+    fixed_price: {
+      type: DataTypes.INTEGER
+    },
+    pm_id: {
+      type: DataTypes.INTEGER
+    },
+    pmt_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Metal,
+        key: "pmt_id"
+      }
+    },
+    cat_id: {
+      type: DataTypes.INTEGER
+    },
+    ps_id: {
+      type: DataTypes.INTEGER
+    },
+    tag_kid: {
+      type: DataTypes.INTEGER
+    },
+    tag_men: {
+      type: DataTypes.INTEGER
+    },
+    tag_women: {
+      type: DataTypes.INTEGER
+    },
+    tag_gift: {
+      type: DataTypes.INTEGER
+    },
+    offer: {
+      type: DataTypes.INTEGER
+    },
+    offer_b2b: {
+      type: DataTypes.INTEGER
+    },
+    weight: {
+      type: DataTypes.INTEGER
+    },
+    dc_rate: {
+      type: DataTypes.INTEGER
+    },
+    dc_qty: {
+      type: DataTypes.INTEGER
+    },
+    dc_rate_bce2: {
+      type: DataTypes.INTEGER
+    },
+    dc_qty_bce2: {
+      type: DataTypes.INTEGER
+    },
+    mk_pp: {
+      type: DataTypes.INTEGER
+    },
+    mk_gm: {
+      type: DataTypes.INTEGER
+    },
+    jarti: {
+      type: DataTypes.INTEGER
+    },
+    dc_rate_b2b: {
+      type: DataTypes.INTEGER
+    },
+    dc_qty_b2b: {
+      type: DataTypes.INTEGER
+    },
+    dc_rate_b2b_b2e2: {
+      type: DataTypes.INTEGER
+    },
+    dc_qty_b2b_b2e2: {
+      type: DataTypes.INTEGER
+    },
+    mk_pp_b2b: {
+      type: DataTypes.INTEGER
+    },
+    mk_gm_b2b: {
+      type: DataTypes.INTEGER
+    },
+    jarti_b2b: {
+      type: DataTypes.INTEGER
     }
-    // slug: {
-    //   type: String,
-    //   required: true,
-    // },
-    // description: {
-    //   type: String,
-    //   required: true,
-    // },
-    // offers:{
-    //   type:[String],
-    // },
-    // categoryId: {
-    //   type: mongoose.ObjectId,
-    //   ref: "Category",
-    //   required: true,
-    // },
-    // giftId: {
-    //   type: mongoose.ObjectId,
-    //   ref: "Gift",
-    //   required: true,
-    // },
-    // preferenceId: {
-    //   type: mongoose.ObjectId,
-    //   ref: "Preference",
-    //   required: true,
-    // },
-    // image: {
-    //   type: String,
-    // },
-    // images:{
-    //   type:[String]
-    // },
-    // status: {
-    //   type: Boolean,
-    // },
   },
-  { timestamps: true }
-);
+  {
+    tableName: 'package',
+    timestamps: false
+  }
+)
 
-export default mongoose.model("Products", productSchema);
+Product.hasOne(Metal, {
+  foreignKey: "pmt_id",
+  sourceKey: "pmt_id"
+})
+Product.hasMany(PackageSlider, {
+  foreignKey: 'id_pack'
+});
+
+
+export default Product

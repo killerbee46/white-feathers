@@ -5,9 +5,6 @@ import User from "./User.js";
 const Cart = sequelize.define(
   "cart",
   {
-    userId:{
-        type: DataTypes.BIGINT,
-    },
     products: {
       type: [DataTypes.INTEGER],
       allowNull: false,
@@ -18,11 +15,12 @@ const Cart = sequelize.define(
     timestamps: false 
   }
 );
-// Cart.hasOne(User,{
-//   foreignKey:'userId',
-//   onDelete: 'RESTRICT',
-//   onUpdate: 'RESTRICT'
-// })
+Cart.hasOne(User,{
+  foreignKey:'c_id',
+  onDelete: 'RESTRICT',
+  onUpdate: 'RESTRICT',
+  as:"userId"
+})
 // User.belongsTo(Cart)
 
 export default Cart

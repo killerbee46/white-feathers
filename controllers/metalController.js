@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Material from '../models/material.js';
+import Material from '../models/Material.js';
 import Metal from '../models/metal.js';
 
 // Create a new metal

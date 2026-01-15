@@ -1,6 +1,6 @@
 import express from "express";
 import authRoutes from "./authRoute.js";
-import futsalRoutes from "./futsalRoutes.js";
+import productRoutes from "./productRoutes.js";
 import userRoutes from "./userRoutes.js";
 import bookingRoutes from "./bookingRoutes.js";
 import categoryRoutes from "./categoryRoutes.js";
@@ -26,7 +26,7 @@ router.get("/",(req, res)=>{
 
 router.use("/auth", authRoutes);
 router.use("/categories", categoryRoutes);
-router.use("/products", futsalRoutes);
+router.use("/products", productRoutes);
 router.use("/users", userRoutes);
 router.use("/booking", bookingRoutes);
 router.use("/profile", profileRoutes);

@@ -1,22 +1,21 @@
-import slugify from "slugify";
 import Category from "../models/Category.js";
+
 export const createCategory = async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
+    const { cat_name, cat_pic } = req.body;
+    if (!cat_name) {
       return res.status(401).send({ message: "Name is required" });
     }
-    const existingCategory = await Category.findOne({ name });
+    const existingCategory = await Category.findOne({where:{ cat_name }});
     if (existingCategory) {
       return res.status(200).send({
         success: false,
-        message: "Category Already Exisits",
+        message: "Category Already Exists",
       });
     }
-    const category = await new Category({
-      ...req?.body,
-      slug: slugify(name),
-    }).save();
+    const category = await Category.create({
+      ...req?.body
+    });
     res.status(201).send({
       success: true,
       message: "New category created",
@@ -35,14 +34,16 @@ export const createCategory = async (req, res) => {
 //update category
 export const updateCategory = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { cat_name, cat_pic } = req.body;
     const { id } = req.params;
-    const category = await Category.findByIdAndUpdate(
-      id,
-      { name, slug: slugify(name) },
-      { new: true }
+    if (!cat_name) {
+      return res.status(401).send({ message: "Category Name is required" });
+    }
+    const category = await Category.findByPk(id)
+    await category.update(
+      { ...req?.body}
     );
-    res.status(200).send({
+    res.status(201).send({
       success: true,
       messsage: "Category Updated Successfully",
       category,
@@ -60,7 +61,7 @@ export const updateCategory = async (req, res) => {
 // get all cat
 export const getCategories = async (req, res) => {
   try {
-    const category = await Category.find({});
+    const category = await Category.findAll({});
     return res.status(200).send({
       success: true,
       message: "All Categories List",
@@ -79,10 +80,10 @@ export const getCategories = async (req, res) => {
 // single category
 export const getCategory = async (req, res) => {
   try {
-    const category = await Category.findOne({ slug: req.params.slug });
+    const category = await Category.findByPk(req?.params?.id);
     res.status(200).send({
       success: true,
-      message: "Get SIngle Category SUccessfully",
+      message: "Get Single Category Successfully",
       category,
     });
   } catch (error) {
@@ -99,7 +100,8 @@ export const getCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    await Category.findByIdAndDelete(id);
+    const category = await Category.findByPk(req?.params?.id);
+    await category.destroy(id);
     res.status(200).send({
       success: true,
       message: "Category Deleted Successfully",

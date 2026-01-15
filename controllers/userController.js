@@ -74,8 +74,7 @@ export const updateProfile = async (req, res) => {
         c_id:user?.c_id,
         name:user?.name,
         email:user?.email,
-        address:user?.address,
-        role:user?.role,
+        address:user?.address
       }
     });
   } catch (error) {

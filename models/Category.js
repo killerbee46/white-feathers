@@ -1,22 +1,26 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
 
-const categorySchema = new mongoose.Schema({
-  name: {
-    type: String,
+const Category = sequelize.define(
+  "Category",
+  {
+    cat_id:{
+      type: DataTypes.INTEGER,
+      autoIncrement:true,
+      primaryKey:true
+    },
+    cat_name:{
+      type: DataTypes.STRING,
+      allowNull:false
+    },
+    cat_pic:{
+      type: DataTypes.STRING
+    }
   },
-  slug: {
-    type: String,
-    lowercase:true
-  },
-  description: {
-    type: String,
-  },
-  image: {
-    type: String,
-  },
-  images:{
-    type:[String],
+  {
+    tableName:'package_category',
+    timestamps:false
   }
-});
+)
 
-export default mongoose.model("Category", categorySchema);
+export default Category

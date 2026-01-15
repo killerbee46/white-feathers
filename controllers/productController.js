@@ -1,25 +1,13 @@
+import Category from "../models/Category.js";
 import Product from "../models/Product.js";
-import categoryModel from "../models/categoryModel.js";
-import orderModel from "../models/orderModel.js";
-
-import fs from "fs";
-import slugify from "slugify";
-import braintree from "braintree";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-//payment gateway
-var gateway = new braintree.BraintreeGateway({
-  environment: braintree.Environment.Sandbox,
-  merchantId: process.env.BRAINTREE_MERCHANT_ID,
-  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
-});
+import productPrice from "../utils/productPrice.js";
+import Material from "../models/Material.js";
+import Metal from "../models/Metal.js";
+import PackageSlider from "../models/PackageSlider.js";
 
 export const createProduct = async (req, res) => {
   try {
-    const { name, description, price, categoryId, quantity, shipping } =
+    const { name, description, categoryId, quantity } =
       req.body;
     //alidation
     switch (true) {
@@ -33,7 +21,7 @@ export const createProduct = async (req, res) => {
         return res.status(400).send({ error: "Quantity is Required" });
     }
 
-    const products = new Product({ ...req.body, slug: slugify(name) });
+    const products = new Product({ ...req.body });
     await products.save();
     res.status(201).send({
       success: true,
@@ -53,23 +41,35 @@ export const createProduct = async (req, res) => {
 //get all products
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product
-      .find({})
-      .populate("category")
-      .select("-photo")
-      .limit(12)
-      .sort({ createdAt: -1 });
-    res.status(200).send({
+    const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
+    const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
+    const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
+    const temp = await Product.findAll({
+      limit:100,
+      include: [{ model: Metal, required: true }, {
+        model: PackageSlider,
+        attributes: ['s_path'],
+        limit: 1
+      }], order: [
+        ['id_pack', 'DESC']]
+    })
+
+    const products = temp?.map((p) => {
+      const productDetails = productPrice({productData:p?.dataValues, goldPrice:goldPrice?.price, silverPrice:silverPrice?.price, diamondPrice:diamondPrice, details:false})
+      return { ...productDetails }
+    })
+    
+    return res.status(200).send({
       success: true,
       counTotal: products.length,
       message: "All Products ",
-      products,
+      products
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    return res.status(500).send({
       success: false,
-      message: "Erorr in getting products",
+      message: "Error in getting products",
       error: error.message,
     });
   }
@@ -77,18 +77,27 @@ export const getProducts = async (req, res) => {
 // get single product
 export const getProduct = async (req, res) => {
   try {
-    const product = await Product
-      .findById(req?.params?.id)
+    const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
+    const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
+    const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
+    const temp = await Product.findByPk(req?.params?.id,{include: [{ model: Metal, required: true }, {
+        model: PackageSlider,
+        attributes: ['s_path'],
+        limit: 1
+      }]})
+
+      const productDetails = productPrice({productData:temp, goldPrice:goldPrice?.price, silverPrice:silverPrice?.price, diamondPrice:diamondPrice, details:true})
+
     res.status(200).send({
       success: true,
       message: "Single Product Fetched",
-      product,
+      product:productDetails
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Eror while getitng single product",
+      message: "Eror while getting single product",
       error,
     });
   }
@@ -296,7 +305,7 @@ export const realtedProduct = async (req, res) => {
 // get prdocyst by catgory
 export const productCategory = async (req, res) => {
   try {
-    const category = await categoryModel.findOne({ slug: req.params.slug });
+    const category = await Category.findOne({ slug: req.params.slug });
     const products = await Product.find({ category }).populate("category");
     res.status(200).send({
       success: true,
@@ -310,55 +319,5 @@ export const productCategory = async (req, res) => {
       error,
       message: "Error While Getting products",
     });
-  }
-};
-
-//payment gateway api
-//token
-export const braintreeToken = async (req, res) => {
-  try {
-    gateway.clientToken.generate({}, function (err, response) {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send(response);
-      }
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-//payment
-export const brainTreePayment = async (req, res) => {
-  try {
-    const { nonce, cart } = req.body;
-    let total = 0;
-    cart.map((i) => {
-      total += i.price;
-    });
-    let newTransaction = gateway.transaction.sale(
-      {
-        amount: total,
-        paymentMethodNonce: nonce,
-        options: {
-          submitForSettlement: true,
-        },
-      },
-      function (error, result) {
-        if (result) {
-          const order = new orderModel({
-            products: cart,
-            payment: result,
-            buyer: req.user._id,
-          }).save();
-          res.json({ ok: true });
-        } else {
-          res.status(500).send(error);
-        }
-      }
-    );
-  } catch (error) {
-    console.log(error);
   }
 };

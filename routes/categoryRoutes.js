@@ -8,16 +8,16 @@ const router = express.Router();
 // create category
 router.post(
   "/",
-  // requireSignIn,
-  // isAdmin,
+  requireSignIn,
+  isAdmin,
   createCategory
 );
 
 //update category
 router.put(
   "/:id",
-  // requireSignIn,
-  // isAdmin,
+  requireSignIn,
+  isAdmin,
   updateCategory
 );
 
@@ -25,13 +25,13 @@ router.put(
 router.get("/", getCategories);
 
 //single category
-router.get("/:slug", getCategory);
+router.get("/:id", getCategory);
 
 //delete category
 router.delete(
   "/:id",
-  // requireSignIn,
-  // isAdmin,
+  requireSignIn,
+  isAdmin,
   deleteCategory
 );
 

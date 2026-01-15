@@ -1,77 +1,62 @@
 import express from "express";
-import {
-  brainTreePaymentController,
-  braintreeTokenController,
-  createProductController,
-  deleteProductController,
-  getProductController,
-  getSingleProductController,
-  productCategoryController,
-  productCountController,
-  productFiltersController,
-  productListController,
-  productPhotoController,
-  realtedProductController,
-  searchProductController,
-  updateProductController,
-} from "../controllers/productController.js";
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 import formidable from "express-formidable";
+import { getProduct, getProducts } from "../controllers/productController.js";
 
 const router = express.Router();
 
 //routes
-router.post(
-  "/create-product",
-  requireSignIn,
-  isAdmin,
-  formidable(),
-  createProductController
-);
-//routes
-router.put(
-  "/update-product/:pid",
-  requireSignIn,
-  isAdmin,
-  formidable(),
-  updateProductController
-);
+// router.post(
+//   "/create-product",
+//   requireSignIn,
+//   isAdmin,
+//   formidable(),
+//   createProduct
+// );
+// //routes
+// router.put(
+//   "/update-product/:pid",
+//   requireSignIn,
+//   isAdmin,
+//   formidable(),
+//   updateProduct
+// );
 
 //get products
-router.get("/get-product", getProductController);
+router.get("/", getProducts);
 
 //single product
-router.get("/get-product/:slug", getSingleProductController);
+router.get("/:id", getProduct);
 
-//get photo
-router.get("/product-photo/:pid", productPhotoController);
+// //get photo
+// router.get("/product-photo/:pid", productPhoto);
 
-//delete rproduct
-router.delete("/delete-product/:pid", deleteProductController);
+// //delete rproduct
+// router.delete("/delete-product/:pid", deleteProduct);
 
-//filter product
-router.post("/product-filters", productFiltersController);
+// //filter product
+// router.post("/product-filters", productFilters);
 
-//product count
-router.get("/product-count", productCountController);
+// //product count
+// router.get("/product-count", productCount);
 
-//product per page
-router.get("/product-list/:page", productListController);
+// //product per page
+// router.get("/product-list/:page", productList);
 
-//search product
-router.get("/search/:keyword", searchProductController);
+// //search product
+// router.get("/search/:keyword", searchProduct);
 
-//similar product
-router.get("/related-product/:pid/:cid", realtedProductController);
+// //similar product
+// router.get("/related-product/:pid/:cid", realtedProduct);
 
-//category wise product
-router.get("/product-category/:slug", productCategoryController);
+// //category wise product
+// router.get("/product-category/:slug", productCategory);
 
-//payments routes
-//token
-router.get("/braintree/token", braintreeTokenController);
+// //payments routes
+// //token
+// // router.get("/braintree/token", braintreeTokenController);
 
-//payments
-router.post("/braintree/payment", requireSignIn, brainTreePaymentController);
+// //payments
+// // router.post("/braintree/payment", requireSignIn, brainTreePaymentController);
 
 export default router;
