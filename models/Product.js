@@ -8,6 +8,7 @@ const Product = sequelize.define(
   {
     id_pack: {
       type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true
     },
     p_name: {

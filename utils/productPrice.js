@@ -30,7 +30,7 @@ const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, detai
             tag_men:productData?.tag_men,
             tag_women:productData?.tag_women,
             tag_gift:productData?.tag_gift,
-            diamondDiscount:diamondPrice?.discount,
+            diamondDiscount:productData?.dc_qty || productData?.dc_qty_bce2 ? diamondPrice?.discount : 0,
             productDiscount:productData?.offer,
         }
     }
@@ -42,7 +42,7 @@ const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, detai
             actualPrice: actualPrice,
             discount: discount,
             finalPrice: finalPrice,
-            diamondDiscount:diamondPrice?.discount
+            diamondDiscount:productData?.dc_qty || productData?.dc_qty_bce2 ? diamondPrice?.discount : 0
         }
     }
 }
