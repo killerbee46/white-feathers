@@ -24,14 +24,14 @@ const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, detai
             actualPrice: actualPrice,
             discount: discount,
             finalPrice: finalPrice,
-            ps_id:productData?.ps_id,
-            metal:productData?.Metal,
-            tag_kid:productData?.tag_kid,
-            tag_men:productData?.tag_men,
-            tag_women:productData?.tag_women,
-            tag_gift:productData?.tag_gift,
-            diamondDiscount:productData?.dc_qty || productData?.dc_qty_bce2 ? diamondPrice?.discount : 0,
-            productDiscount:productData?.offer,
+            ps_id: productData?.ps_id,
+            metal: productData?.Metal,
+            tag_kid: productData?.tag_kid,
+            tag_men: productData?.tag_men,
+            tag_women: productData?.tag_women,
+            tag_gift: productData?.tag_gift,
+            diamondDiscount: productData?.dc_qty || productData?.dc_qty_bce2 ? diamondPrice?.discount : 0,
+            productDiscount: productData?.offer,
         }
     }
     else {
@@ -39,10 +39,10 @@ const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, detai
             id: productData?.id_pack,
             image: image,
             title: productData?.p_name,
-            actualPrice: actualPrice,
+            dynamicPrice: actualPrice,
             discount: discount,
             finalPrice: finalPrice,
-            diamondDiscount:productData?.dc_qty || productData?.dc_qty_bce2 ? diamondPrice?.discount : 0
+            diamondDiscount: productData?.dc_qty || productData?.dc_qty_bce2 ? diamondPrice?.discount : 0
         }
     }
 }

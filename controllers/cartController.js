@@ -1,26 +1,56 @@
 import { sequelize } from "../config/tempDb.js";
 import Cart from "../models/Cart.js";
+import Material from "../models/Material.js";
+import Metal from "../models/Metal.js";
+import PackageSlider from "../models/PackageSlider.js";
+import Product from "../models/Product.js";
 import Wishlist from "../models/Wishlist.js";
+import productPrice from "../utils/productPrice.js";
 import { sqlProductFetch } from "../utils/sqlProductFetch.js";
 
 export const getCart = async (req, res) => {
     try {
-        const userId = req?.params?.id
+        const userId = req?.user?.id
         const cart = await Cart.findOne({ userId: userId })
         let finalPrice = 0
         let discount = 0
-        // cart?.products?.map((p)=> {
-        //     finalPrice += (p?.dynamic_price * p?.quantity)
-        //     discount += (p?.discount * p?.quantity)
-        // })
+        const temp = JSON.parse(cart?.products || "[]")
+
+        const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
+        const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
+        const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
+        const allProducts = await Product.findAll({
+            include: [{ model: Metal, required: true }, {
+                model: PackageSlider,
+                attributes: ['s_path'],
+                limit: 1
+            }]
+        })
+
+        const products = temp?.map((t) => {
+            const product = allProducts.find((f) => f?.id_pack === t?.id)
+            const productDetail = productPrice({ productData: product?.dataValues, goldPrice: goldPrice?.price, silverPrice: silverPrice?.price, diamondPrice: diamondPrice, details: false })
+            return { ...productDetail, quantity: t?.quantity }
+        })
+
+        let totalPrice = 0
+        let totalDiscount = 0
+        let totalFinalPrice = 0
+
+        products?.map((p) => {
+            totalPrice += (p?.dynamicPrice * p?.quantity)
+            totalDiscount += (p?.discount * p?.quantity)
+            totalFinalPrice += (p?.finalPrice * p?.quantity)
+        })
+
         return res.status(200).json({
             status: 'success',
             message: "Cart fetched successfully",
             data: {
-                products:cart?.products,
-                totalPrice:(finalPrice+discount).toFixed(2),
-                discount:discount.toFixed(2),
-                finalPrice:finalPrice.toFixed(2)
+                products: products,
+                totalPrice: totalPrice.toFixed(2),
+                discount: totalDiscount.toFixed(2),
+                finalPrice: totalFinalPrice.toFixed(2)
             },
 
         })
@@ -38,14 +68,13 @@ export const getCart = async (req, res) => {
 export const addCart = async (req, res) => {
     try {
         const { productId } = req.params;
-        const userId = 119
-        const cart = await Cart.find({ userId: userId })
+        const userId = req?.user?.id
+        const cart = await Cart.findOne({ userId: userId })
         // const wishlist = await Wishlist.findOne({ userId: userId })
         req.body.userId = userId
-        let list = []
 
-        const query = sqlProductFetch("p.p_name as title,")+` and p.id_pack = ${productId} `
-        const [data] = await sequelize.query(query)
+        const list = JSON.parse(cart?.products || "[]")
+
         //validations
         if (!productId) {
             return res.send({ error: "Please select a product to add" });
@@ -61,28 +90,29 @@ export const addCart = async (req, res) => {
         // }
 
         if (cart) {
-            list = cart?.products
-            const existingIds = cart.products?.map((p)=> p?.id )
-            if (existingIds.includes(parseInt(productId))) {
+            const existingIds = list?.some((p) => p?.id == productId)
+            if (existingIds) {
                 return res.status(409).json({
                     status: 'failed',
                     message: 'Product already in the Cart'
                 })
             }
-            // list.push(productId)
-            const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                $push: { products: {...data[0], quantity:1} }
-            })
-            return res.status(201).json({
-                status: 'success',
-                message: "Added to Cart"
-            })
+            else {
+                list.push({ id: parseInt(productId), quantity: 1 })
+                const wish = await cart.update({
+                    products: JSON.stringify(list)
+                })
+                return res.status(201).json({
+                    status: 'success',
+                    message: "Added to Cart"
+                })
+            }
         } else {
-            list.push({...data[0], quantity:1})
-            const wish = new Cart({
+            list.push({ id: parseInt(productId), quantity: 1 })
+            const wish = await Cart.create({
                 userId: userId,
                 products: list
-            }).save()
+            })
             return res.status(201).json({
                 status: 'success',
                 message: "Added to Cart",
@@ -161,9 +191,9 @@ export const removeCart = async (req, res) => {
         if (cart) {
             list = cart?.products
 
-            const newList = list?.filter((f)=> f.id != productId)
+            const newList = list?.filter((f) => f.id != productId)
 
-            const existingIds = cart.products?.map((p)=> p.id )
+            const existingIds = cart.products?.map((p) => p.id)
             if (!existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
@@ -172,7 +202,7 @@ export const removeCart = async (req, res) => {
             }
             // list.push(productId)
             const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                products:newList
+                products: newList
             })
             return res.status(201).json({
                 status: 'success',
@@ -203,30 +233,30 @@ export const switchToWishlist = async (req, res) => {
         req.body.userId = userId
         let list = []
 
-        const query = sqlProductFetch("p.p_name as title,")+` and p.id_pack = ${productId} `
+        const query = sqlProductFetch("p.p_name as title,") + ` and p.id_pack = ${productId} `
         const [data] = await sequelize.query(query)
         //validations
         if (!productId) {
             return res.send({ error: "Please select a product to add" });
         }
-list = cart?.products
+        list = cart?.products
 
-            const newList = list?.filter((f)=> f.id != productId)
+        const newList = list?.filter((f) => f.id != productId)
 
-            const existingCart = cart?.products?.map((p)=> p.id )
-            if (!existingCart.includes(parseInt(productId))) {
-                return res.status(409).json({
-                    status: 'failed',
-                    message: 'Product is not in the cart'
-                })
-            }
-            // list.push(productId)
-            const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                products:newList
+        const existingCart = cart?.products?.map((p) => p.id)
+        if (!existingCart.includes(parseInt(productId))) {
+            return res.status(409).json({
+                status: 'failed',
+                message: 'Product is not in the cart'
             })
+        }
+        // list.push(productId)
+        const wish = await Cart.findByIdAndUpdate(cart?._id, {
+            products: newList
+        })
         if (wishlist) {
             list = wishlist?.products
-            const existingIds = wishlist.products?.map((p)=> p?.id )
+            const existingIds = wishlist.products?.map((p) => p?.id)
             if (existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
@@ -235,17 +265,17 @@ list = cart?.products
             }
             // list.push(productId)
             const wishlistCreate = await Wishlist.findByIdAndUpdate(wishlist?._id, {
-                $push: { products: {...data[0]} }
+                $push: { products: { ...data[0] } }
             })
 
-            
+
 
             return res.status(201).json({
                 status: 'success',
                 message: "Switched to Wishlist"
             })
         } else {
-            list.push({...data[0]})
+            list.push({ ...data[0] })
             const wish = new Wishlist({
                 userId: userId,
                 products: list

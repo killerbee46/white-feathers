@@ -127,5 +127,4 @@ Product.hasMany(PackageSlider, {
   foreignKey: 'id_pack'
 });
 
-
 export default Product
