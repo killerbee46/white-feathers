@@ -12,14 +12,14 @@ export const getCart = async (req, res) => {
     try {
         const userId = req?.user?.id
         const cart = await Cart.findOne({ userId: userId })
-        let finalPrice = 0
-        let discount = 0
         const temp = JSON.parse(cart?.products || "[]")
+        const ids = temp?.map((t) => t?.id)
 
         const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
         const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
         const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
         const allProducts = await Product.findAll({
+            where: { id_pack: ids },
             include: [{ model: Metal, required: true }, {
                 model: PackageSlider,
                 attributes: ['s_path'],
@@ -111,7 +111,7 @@ export const addCart = async (req, res) => {
             list.push({ id: parseInt(productId), quantity: 1 })
             const wish = await Cart.create({
                 userId: userId,
-                products: list
+                products: JSON.stringify(list)
             })
             return res.status(201).json({
                 status: 'success',
@@ -134,15 +134,13 @@ export const updateCart = async (req, res) => {
         const { quantity } = req?.body
         const userId = req?.user?._id
         const cart = await Cart.findOne({ userId: userId })
-        req.body.userId = userId
-        let list = []
+        const list = JSON.parse(cart?.products || "[]")
         //validations
         if (!productId) {
-            return res.send({ error: "Please select a product to remove" });
+            return res.send({ error: "Please select a product to update" });
         }
 
         if (cart) {
-            list = cart?.products
 
             const updatedList = list.map((l) => {
                 if (l.id == productId) {
@@ -153,8 +151,8 @@ export const updateCart = async (req, res) => {
             });
 
             // list.push(productId)
-            const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                products: updatedList
+            const wish = await cart.update({
+                products: JSON.stringify(updatedList)
             })
             return res.status(201).json({
                 status: 'success',
@@ -181,33 +179,31 @@ export const removeCart = async (req, res) => {
         const { productId } = req.params;
         const userId = req?.user?._id
         const cart = await Cart.findOne({ userId: userId })
-        req.body.userId = userId
-        let list = []
+        const list = JSON.parse(cart?.products || "[]")
         //validations
         if (!productId) {
             return res.send({ error: "Please select a product to remove" });
         }
 
         if (cart) {
-            list = cart?.products
-
-            const newList = list?.filter((f) => f.id != productId)
-
-            const existingIds = cart.products?.map((p) => p.id)
-            if (!existingIds.includes(parseInt(productId))) {
+            const existingIds = list?.some((p) => p?.id == productId)
+            if (!existingIds) {
                 return res.status(409).json({
                     status: 'failed',
-                    message: 'Product is not in the Cart'
+                    message: 'Product not in the Cart'
                 })
             }
-            // list.push(productId)
-            const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                products: newList
-            })
-            return res.status(201).json({
-                status: 'success',
-                message: "Removed from Cart"
-            })
+            else {
+                const newList = list?.filter((f) => f.id != productId)
+                // list.push(productId)
+                const wish = await cart.update({
+                    products: JSON.stringify(newList)
+                })
+                return res.status(201).json({
+                    status: 'success',
+                    message: "Removed from Cart"
+                })
+            }
         } else {
             return res.status(400).json({
                 status: 'failed',
@@ -218,7 +214,7 @@ export const removeCart = async (req, res) => {
         console.log(error);
         res.status(500).send({
             success: false,
-            message: "Error while switching to Cart",
+            message: "Error while deleting from Cart",
             error
         });
     }
