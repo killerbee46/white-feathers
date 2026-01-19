@@ -5,11 +5,11 @@ import { addCart, getCart, removeCart, switchToWishlist, updateCart } from "../c
 const router = express.Router();
 
 router.get("/",
-    // requireSignIn, 
+    requireSignIn, 
     getCart);
 router.post("/switch-to-wishlist/:productId",requireSignIn, switchToWishlist);
 router.post("/:productId",
-    // requireSignIn, 
+    requireSignIn, 
     addCart);
 router.patch("/:productId",requireSignIn, updateCart);
 router.delete("/:productId",requireSignIn, removeCart);

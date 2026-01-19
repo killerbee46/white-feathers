@@ -1,15 +1,24 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
 
-const WishlistSchema = new mongoose.Schema(
+const Wishlist = sequelize.define(
+  "Wishlist",
   {
-    userId: {
-      type: String,
+    id:{
+      type:DataTypes.INTEGER,
+      primaryKey:true,
+      autoIncrement:true
     },
-    products: { 
-        type: [Object]
+    userId:{
+      type: DataTypes.INTEGER,
+    },
+    products: {
+      type: DataTypes.STRING
     }
   },
-  { timestamps: true }
+  { 
+    timestamps: false 
+  }
 );
 
-export default mongoose.model("Wishlists", WishlistSchema);
+export default Wishlist
