@@ -1,26 +1,34 @@
 import { sequelize } from "../config/tempDb.js";
-import Cart from "../models/Cart.js";
+import Order from "../models/Order.js";
 import { sqlProductFetch } from "../utils/sqlProductFetch.js";
 
 export const getOrders = async (req, res) => {
     try {
-        const userId = req?.user?._id
-        const cart = await Cart.findOne({ userId: userId }, 'products')
-        let finalPrice = 0
-        let discount = 0
-        cart?.products?.map((p)=> {
-            finalPrice += (p?.dynamic_price * p?.quantity)
-            discount += (p?.discount * p?.quantity)
+
+        const ord = await Order.findAll({ where: {checkout:{$not:0}} })
+
+        const ordDetails = ord?.map((o) => {
+            let totalPrice = 0
+            let pdiscount = 0
+            const products = JSON.parse(o?.cookie_id)?.products ?? []
+            products?.map((p) => {
+                totalPrice += (p.dynamic_price * p.quantity + p.discount * p.quantity);
+                pdiscount += p.discount * p.quantity;
+            })
+            delete o.cookie_id
+            return {
+                ...o.dataValues,
+                products: products,
+                totalPrice: totalPrice,
+                totalDiscount: pdiscount,
+                finalPrice: (totalPrice - pdiscount)
+            }
         })
+
         return res.status(200).json({
             status: 'success',
-            message: "Cart fetched successfully",
-            data: {
-                products:cart?.products,
-                totalPrice:(finalPrice+discount).toFixed(2),
-                discount:discount.toFixed(2),
-                finalPrice:finalPrice.toFixed(2)
-            },
+            message: "Orders fetched successfully",
+            data: ordDetails
 
         })
     } catch (error) {
@@ -28,7 +36,45 @@ export const getOrders = async (req, res) => {
         res.status(500).send({
             success: false,
             error,
-            message: "Error while getting users cart",
+            message: "Error while getting users orders",
+        });
+    }
+};
+
+export const getOrdersByUser = async (req, res) => {
+    try {
+        const userId = req?.user?.id
+
+        const ord = await Order.findAll({ where: {$and:[{ c_id: userId}, {checkout:{$not:0}} ]} })
+
+        const ordDetails = ord?.map((o) => {
+            let totalPrice = 0
+            let pdiscount = 0
+            const products = JSON.parse(o?.cookie_id)?.products ?? []
+            products?.map((p) => {
+                totalPrice += (p.dynamic_price * p.quantity + p.discount * p.quantity);
+                pdiscount += p.discount * p.quantity;
+            })
+            return {
+                products: products,
+                totalPrice: totalPrice,
+                totalDiscount: pdiscount,
+                finalPrice: (totalPrice - pdiscount)
+            }
+        })
+
+        return res.status(200).json({
+            status: 'success',
+            message: "Orders fetched successfully",
+            data: ordDetails
+
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            error,
+            message: "Error while getting users orders",
         });
     }
 };
@@ -42,7 +88,7 @@ export const createOrder = async (req, res) => {
         req.body.userId = userId
         let list = []
 
-        const query = sqlProductFetch("p.p_name as title,")+` and p.id_pack = ${productId} `
+        const query = sqlProductFetch("p.p_name as title,") + ` and p.id_pack = ${productId} `
         const [data] = await sequelize.query(query)
         //validations
         if (!productId) {
@@ -51,7 +97,7 @@ export const createOrder = async (req, res) => {
 
         if (cart) {
             list = cart?.products
-            const existingIds = cart.products?.map((p)=> p?.id )
+            const existingIds = cart.products?.map((p) => p?.id)
             if (existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
@@ -60,14 +106,14 @@ export const createOrder = async (req, res) => {
             }
             // list.push(productId)
             const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                $push: { products: {...data[0], quantity:1} }
+                $push: { products: { ...data[0], quantity: 1 } }
             })
             return res.status(201).json({
                 status: 'success',
                 message: "Added to Cart"
             })
         } else {
-            list.push({...data[0], quantity:1})
+            list.push({ ...data[0], quantity: 1 })
             const wish = new Cart({
                 userId: userId,
                 products: list
@@ -150,9 +196,9 @@ export const removeCart = async (req, res) => {
         if (cart) {
             list = cart?.products
 
-            const newList = list?.filter((f)=> f.id != productId)
+            const newList = list?.filter((f) => f.id != productId)
 
-            const existingIds = cart.products?.map((p)=> p.id )
+            const existingIds = cart.products?.map((p) => p.id)
             if (!existingIds.includes(parseInt(productId))) {
                 return res.status(409).json({
                     status: 'failed',
@@ -161,7 +207,7 @@ export const removeCart = async (req, res) => {
             }
             // list.push(productId)
             const wish = await Cart.findByIdAndUpdate(cart?._id, {
-                products:newList
+                products: newList
             })
             return res.status(201).json({
                 status: 'success',

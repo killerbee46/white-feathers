@@ -1,64 +1,85 @@
-import mongoose from "mongoose";
+import { sequelize } from "../config/tempDb.js";
+import { DataTypes } from "sequelize";
 
-// interface materialsType {
-//   materialId:String;
-//   metalId?:String;
-//   weight:Number;
-//   unit:"gm"|"tola"|"carat"|"cent";
-//   makingCharge?:Number;
-//   makingUnit?:"gm"|"tola"|"percent"
-// }
-
-const productSchema = new mongoose.Schema(
+const Order = sequelize.define(
+  "Order",
   {
-    userId: {
-      type: mongoose.ObjectId,
-      required: true,
+    cb_id: {
+      type: DataTypes.INTEGER,
+      autoIncrement:true,
+      primaryKey:true
     },
-    products:{
-      type:[Object],
+    cookie_id:{
+      type:DataTypes.STRING
     },
-    status:{
-        type:String,
-        enum:["pending","packed","delivering","delivered"]
+    name:{
+      type:DataTypes.STRING
+    },
+    cno:{
+      type:DataTypes.STRING
+    },
+    email:{
+      type:DataTypes.STRING
+    },
+    msg:{
+      type:DataTypes.STRING
+    },
+    address:{
+      type:DataTypes.STRING
+    },
+    book_date:{
+      type:DataTypes.DATE
+    },
+    p_date:{
+      type:DataTypes.DATEONLY
+    },
+    ip:{
+      type:DataTypes.INTEGER
+    },
+    mode:{
+      type:DataTypes.INTEGER
+    },
+    p_id:{
+      type:DataTypes.INTEGER
+    },
+    dispatch:{
+      type:DataTypes.INTEGER
+    },
+    deliver:{
+      type:DataTypes.INTEGER
+    },
+    checkout:{
+      type:DataTypes.INTEGER
+    },
+    c_id:{
+      type:DataTypes.INTEGER
+    },
+    p_amount:{
+      type:DataTypes.INTEGER
+    },
+    cur_id:{
+      type:DataTypes.INTEGER
+    },
+    c_request:{
+      type:DataTypes.INTEGER
+    },
+    esewa_code:{
+      type:DataTypes.INTEGER
+    },
+    esewa_verify:{
+      type:DataTypes.INTEGER
+    },
+    khalti_code:{
+      type:DataTypes.INTEGER
+    },
+    tracking_code:{
+      type:DataTypes.BIGINT
     }
-    // slug: {
-    //   type: String,
-    //   required: true,
-    // },
-    // description: {
-    //   type: String,
-    //   required: true,
-    // },
-    // offers:{
-    //   type:[String],
-    // },
-    // categoryId: {
-    //   type: mongoose.ObjectId,
-    //   ref: "Category",
-    //   required: true,
-    // },
-    // giftId: {
-    //   type: mongoose.ObjectId,
-    //   ref: "Gift",
-    //   required: true,
-    // },
-    // preferenceId: {
-    //   type: mongoose.ObjectId,
-    //   ref: "Preference",
-    //   required: true,
-    // },
-    // image: {
-    //   type: String,
-    // },
-    // images:{
-    //   type:[String]
-    // },
-    // status: {
-    //   type: Boolean,
-    // },
   },
-  { timestamps: true }
+  { 
+    timestamps: false,
+    tableName:"cart_book" 
+  }
 );
 
-export default mongoose.model("Products", productSchema);
+export default Order;
