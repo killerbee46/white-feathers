@@ -13,12 +13,12 @@ export const getProducts = async (req, res) => {
     let existingCart = []
     if (req.user) {
 
-      const userId = req.user._id
+      const userId = req.user.id
 
-      const wishlist = await Wishlist.findOne({ userId: userId }, "products")
-      const cart = await Cart.findOne({ userId: userId }, "products")
-      existingWishlist = wishlist ? wishlist?.products?.map((w) => w?.id) : []
-      existingCart = cart ? cart?.products?.map((c) => c?.id) : []
+      const wishlist = await Wishlist.findOne({ userId: userId })
+      const cart = await Cart.findOne({ userId: userId })
+      existingWishlist = JSON.parse(wishlist?.products || "[]")?.map((w) => w)
+      existingCart = JSON.parse(cart?.products || "[]")?.map((c) => c?.id)
     }
     const wishListCheck = existingWishlist.length !== 0 ? ` IF(p.id_pack in (${existingWishlist?.join(",")}), true, false) as wishlist, ` : ""
     const cartCheck = existingCart.length !== 0 ? ` IF(p.id_pack in (${existingCart?.join(",")}), true, false) as cart, ` : ""
@@ -50,10 +50,10 @@ export const getProduct = async (req, res) => {
 
       const userId = req.user._id
 
-      const wishlist = await Wishlist.findOne({ userId: userId }, "products")
-      const cart = await Cart.findOne({ userId: userId }, "products")
-      existingWishlist = wishlist?.products?.map((w) => w?.id) || []
-      existingCart = cart?.products?.map((c) => c?.id) || []
+      const wishlist = await Wishlist.findOne({ userId: userId })
+      const cart = await Cart.findOne({ userId: userId })
+      existingWishlist = JSON.parse(wishlist?.products || "[]")?.map((w) => w)
+      existingCart = JSON.parse(cart?.products || "[]")?.map((c) => c?.id)
     }
     const wishListCheck = existingWishlist?.length !== 0 ? ` IF(p.id_pack in (${existingWishlist?.join(",")}), true, false) as wishlist, ` : ""
     const cartCheck = existingCart?.length !== 0 ? ` IF(p.id_pack in (${existingCart?.join(",")}), true, false) as cart, ` : ""

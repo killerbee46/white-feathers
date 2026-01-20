@@ -1,32 +1,29 @@
 import express from "express";
-import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
-import formidable from "express-formidable";
-import { createProduct, deleteProduct, getProduct, getProducts, productCategory, updateProduct } from "../controllers/productController.js";
+import { checkForSignIn, isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
+import { createProduct, deleteProduct, getProduct, getProductsWQuery, productCategory, updateProduct } from "../controllers/productController.js";
 
 const router = express.Router();
 
 //routes
 router.post(
   "/",
-//   requireSignIn,
-//   isAdmin,
-//   formidable(),
+  requireSignIn,
+  isAdmin,
   createProduct
 );
 //routes
 router.put(
   "/:id",
-//   requireSignIn,
-//   isAdmin,
-//   formidable(),
+  requireSignIn,
+  isAdmin,
   updateProduct
 );
 
 //get products
-router.get("/", getProducts);
+router.get("/", checkForSignIn, getProductsWQuery);
 
 //single product
-router.get("/:id", getProduct);
+router.get("/:id", checkForSignIn, getProduct);
 
 //single product
 router.get("/category/:id", productCategory);

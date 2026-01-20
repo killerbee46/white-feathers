@@ -1,4 +1,4 @@
-const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, details = false }) => {
+const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, details = false,carts,wishes }) => {
 
     const metal = productData?.Metal
 
@@ -32,6 +32,8 @@ const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, detai
             tag_gift: productData?.tag_gift,
             diamondDiscount: productData?.dc_qty || productData?.dc_qty_bce2 ? diamondPrice?.discount : 0,
             productDiscount: productData?.offer,
+            cart:carts?.includes(productData?.id_pack)?1:0,
+            wishlist:wishes?.includes(productData?.id_pack)?1:0
         }
     }
     else {

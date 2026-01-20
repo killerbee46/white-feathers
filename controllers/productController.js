@@ -3,6 +3,47 @@ import productPrice from "../utils/productPrice.js";
 import Material from "../models/Material.js";
 import Metal from "../models/Metal.js";
 import PackageSlider from "../models/PackageSlider.js";
+import Wishlist from "../models/Wishlist.js";
+import Cart from "../models/Cart.js";
+import { sequelize } from "../config/tempDb.js";
+import { sqlProductFetch } from "../utils/sqlProductFetch.js";
+import { sqlFilterHandler } from "../utils/sqlFilterHandler.js";
+
+//get all products
+export const getProductsWQuery = async (req, res) => {
+  try {
+    let existingWishlist = []
+    let existingCart = []
+    if (req.user) {
+
+      const userId = req.user.id
+
+      const wishlist = await Wishlist.findOne({ userId: userId })
+      const cart = await Cart.findOne({ userId: userId })
+      existingWishlist = JSON.parse(wishlist?.products || "[]")?.map((w) => w)
+      existingCart = JSON.parse(cart?.products || "[]")?.map((c) => c?.id)
+    }
+    const wishListCheck = existingWishlist.length !== 0 ? ` IF(p.id_pack in (${existingWishlist?.join(",")}), true, false) as wishlist, ` : ""
+    const cartCheck = existingCart.length !== 0 ? ` IF(p.id_pack in (${existingCart?.join(",")}), true, false) as cart, ` : ""
+
+    const categories = req?.query?.category
+    const categoryFilter = (categories && categories.length !== 0) ? " and cat_id = " + categories.join(" or cat_id = ") : ""
+    const query = sqlProductFetch("p.p_name as title," + wishListCheck + cartCheck) + categoryFilter + sqlFilterHandler(req?.query)
+    const [data] = await sequelize.query(query)
+
+    res.status(200).json({
+      status: 'success',
+      data: data,
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      status: 'failed',
+      message: "Erorr while getting products",
+      error: error.message,
+    });
+  }
+};
 
 export const createProduct = async (req, res) => {
   try {
@@ -40,6 +81,7 @@ export const createProduct = async (req, res) => {
 //get all products
 export const getProducts = async (req, res) => {
   try {
+    
     const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
     const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
     const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
@@ -77,23 +119,39 @@ export const getProducts = async (req, res) => {
 // get single product
 export const getProduct = async (req, res) => {
   try {
+
+    let existingWishlist = []
+    let existingCart = []
+    if (req.user) {
+
+      const userId = req.user.id
+
+      const wishlist = await Wishlist.findOne({ userId: userId })
+      const cart = await Cart.findOne({ userId: userId })
+      existingWishlist = JSON.parse(wishlist?.products || "[]")?.map((w) => w)
+      existingCart = JSON.parse(cart?.products || "[]")?.map((c) => c?.id)
+    }
+
     const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
     const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
     const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
     const temp = await Product.findByPk(req?.params?.id, {
-      include: [{ model: Metal, required: true }, {
-        model: PackageSlider,
-        attributes: ['s_path'],
-        limit: 1
-      }]
+      include: [
+        { model: Metal, required: true },
+        {
+          model: PackageSlider,
+          attributes: ['s_path'],
+          limit: 1
+        }
+      ]
     })
 
-    const productDetails = productPrice({ productData: temp, goldPrice: goldPrice?.price, silverPrice: silverPrice?.price, diamondPrice: diamondPrice, details: true })
+    const productDetails = productPrice({ productData: temp, goldPrice: goldPrice?.price, silverPrice: silverPrice?.price, diamondPrice: diamondPrice, details: true,wishes:existingWishlist,carts:existingCart })
 
     res.status(200).send({
       success: true,
       message: "Single Product Fetched",
-      product: temp
+      product: productDetails
     });
   } catch (error) {
     console.log(error);

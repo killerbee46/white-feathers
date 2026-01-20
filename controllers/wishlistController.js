@@ -1,4 +1,3 @@
-import { sequelize } from "../config/tempDb.js";
 import Cart from "../models/Cart.js";
 import Material from "../models/Material.js";
 import Metal from "../models/Metal.js";
@@ -6,7 +5,6 @@ import PackageSlider from "../models/PackageSlider.js";
 import Product from "../models/Product.js";
 import Wishlist from "../models/Wishlist.js";
 import productPrice from "../utils/productPrice.js";
-import { sqlProductFetch } from "../utils/sqlProductFetch.js";
 
 export const getWishlist = async (req, res) => {
     try {
