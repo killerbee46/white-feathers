@@ -1,5 +1,6 @@
 import { sequelize } from "../config/tempDb.js";
 import { DataTypes } from "sequelize";
+import CartDetails from "./CartDetails.js";
 
 const Order = sequelize.define(
   "Order",
@@ -81,5 +82,9 @@ const Order = sequelize.define(
     tableName:"cart_book" 
   }
 );
+
+Order.hasMany(CartDetails, {
+  foreignKey: 'cb_id'
+});
 
 export default Order;

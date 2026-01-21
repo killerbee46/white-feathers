@@ -1,32 +1,31 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/tempDb.js";
-import Product from "./Product.js";
 
 const PackageSlider = sequelize.define(
     "Images",
     {
-        s_id:{
+        s_id: {
             type: DataTypes.INTEGER,
-            primaryKey:true,
+            primaryKey: true,
         },
-        id_pack:{
+        id_pack: {
             type: DataTypes.INTEGER,
         },
-        s_path:{
+        s_path: {
             type: DataTypes.STRING
         }
     },
     {
-        tableName:'package_slider',
-        timestamps:false
+        tableName: 'package_slider',
+        timestamps: false
     }
 )
 
- PackageSlider.associate = (models) => {
+PackageSlider.associate = (models) => {
     PackageSlider.belongsTo(models.Product, {
-      foreignKey: 'id_pack',
-      as: 'product'
+        foreignKey: 'id_pack',
+        as: 'product'
     });
-  };
+};
 
 export default PackageSlider
