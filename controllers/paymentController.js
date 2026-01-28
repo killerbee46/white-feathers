@@ -1,49 +1,73 @@
 import dayjs from "dayjs";
 import Payment from "../models/Payment.js";
-import userModel from "../models/userModel.js";
 import { getEsewaPaymentHash, verifyEsewaPayment } from "../utils/esewa.js";
 import { sequelize } from "../config/tempDb.js";
+import User from "../models/User.js";
+import Order from "../models/Order.js";
+import Material from "../models/Material.js";
+import Product from "../models/Product.js";
+import Metal from "../models/Metal.js";
+import PackageSlider from "../models/PackageSlider.js";
+import productPrice from "../utils/productPrice.js";
 
 export const initializeEsewaPayment = async (req, res) => {
   try {
-const { products, productId } = req?.body
-    const userId = req?.user?._id
-    const user = await userModel.findById(userId, 'name email phone address')
-    if ((!products || products?.length === 0) && productId) {
-      const query = sqlProductFetch("p.p_name as title,") + ` and p.id_pack = ${productId} `
-      const [data] = await sequelize.query(query)
-      req.body.products.push({ ...data[0], quantity: 1 })
-    }
-    let finalPrice = 0
+
+    const userId = req?.user?.id
+    const user = await User.findByPk(userId, { attributes: ['name', 'address', 'phone', "email"] })
+    const { products: temp, name, address, msg } = req?.body
+    const ids = temp?.map((t) => t?.id)
+
+    const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
+    const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
+    const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
+    const allProducts = await Product.findAll({
+      where: { id_pack: ids },
+      include: [{ model: Metal, required: true }, {
+        model: PackageSlider,
+        attributes: ['s_path'],
+        limit: 1
+      }]
+    })
+
+    const products = temp?.map((t) => {
+      const product = allProducts.find((f) => f?.id_pack === t?.id)
+      const productDetail = productPrice({ productData: product?.dataValues, goldPrice: goldPrice?.price, silverPrice: silverPrice?.price, diamondPrice: diamondPrice, details: false })
+      return { ...productDetail, quantity: t?.quantity }
+    })
+
+    let totalPrice = 0
     let totalDiscount = 0
+    let totalFinalPrice = 0
+
     products?.map((p) => {
-      const price = p?.dynamic_price * p?.quantity
-      const discount = p?.discount * p?.quantity
-      finalPrice += price
-      totalDiscount += discount
+      totalPrice += (p?.dynamicPrice * p?.quantity)
+      totalDiscount += (p?.discount * p?.quantity)
+      totalFinalPrice += (p?.finalPrice * p?.quantity)
     })
 
-    const orderDetails = JSON.stringify({
-      products:products,
-      totalPrice:(finalPrice+totalDiscount).toFixed(2),
-      totalDiscount:(totalDiscount).toFixed(2),
-      finalPrice:(finalPrice).toFixed(2),
+    const createdOrder = await Order.create({
+      name: name ?? user?.name,
+      cno: user?.phone,
+      email: user?.email,
+      address: address ?? user?.address,
+      msg: msg,
+      cookie_id: JSON.stringify({ products: products }),
+      checkout: 0,
+      mode: 1,
+      tracking_code: dayjs().unix(),
+      cur_id: 1,
+      dispatch: 0,
+      deliver: 0,
+      c_id: userId,
+      p_date: dayjs().format("YYYY-MM-DD")
     })
 
-    const orderQuery = `INSERT INTO cart_book (cookie_id, name, cno, email, address,tracking_code, cur_id,msg,ip,mode,p_id,p_amount) VALUES (
-    '${orderDetails}','${user?.name}','${user?.phone}','${user?.email}','${user?.address}','${dayjs().unix()}',1,'esewa','','3',0,${(finalPrice).toFixed(2)}
-    );`
-
-    let tId = ''
-
-    const [orderCreate] = await sequelize.query(orderQuery)
-    tId = await sequelize.query(`Select tracking_code from cart_book where cb_id = ${orderCreate}`).then((data)=>{
-        return data[0]?.[0]?.tracking_code
-    })
+    const tId = createdOrder?.tracking_code
 
     // Initiate payment with eSewa
     const paymentInitiate = await getEsewaPaymentHash({
-      amount: (finalPrice).toFixed(2),
+      amount: 450,
       transaction_uuid: tId,
     });
 
@@ -51,8 +75,8 @@ const { products, productId } = req?.body
     return res.json({
       success: true,
       payment: paymentInitiate,
-      id:tId,
-      amount:(finalPrice).toFixed(2)
+      id: tId,
+      amount: 450
     });
   } catch (error) {
     return res.status(500).json({
@@ -68,7 +92,7 @@ export const completeEsewaPayment = async (req, res) => {
   try {
     // Verify payment with eSewa
     const paymentInfo = await verifyEsewaPayment(data);
-    
+
     // Find the purchased item using the transaction UUID
     const orderQuery = `UPDATE cart_book
 SET checkout = 1, esewa_code = '${paymentInfo.decodedData.transaction_code}',esewa_verify=1, p_date = ${dayjs().format("YYYY-MM-DD")},
@@ -78,7 +102,7 @@ WHERE tracking_code = ${paymentInfo.decodedData.transaction_uuid}`
     // PurchasedItem.findById(
     //   paymentInfo.response.transaction_uuid
     // );
-    
+
 
     // Create a new payment record in the database
     const paymentData = await Payment.create({
@@ -113,7 +137,7 @@ export const failedEsewaPayment = async (req, res) => {
   try {
     // Verify payment with eSewa
     const paymentInfo = await verifyEsewaPayment(data);
-    
+
     // Find the purchased item using the transaction UUID
     const orderQuery = `delete from cart_book
 WHERE tracking_code = ${paymentInfo.decodedData.transaction_uuid}`
@@ -121,7 +145,7 @@ WHERE tracking_code = ${paymentInfo.decodedData.transaction_uuid}`
     // PurchasedItem.findById(
     //   paymentInfo.response.transaction_uuid
     // );
-    
+
 
     // Create a new payment record in the database
     const paymentData = await Payment.create({

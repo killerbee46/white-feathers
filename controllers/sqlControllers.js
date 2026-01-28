@@ -1,5 +1,6 @@
 import { sequelize } from "../config/tempDb.js";
 import Cart from "../models/Cart.js";
+import User from "../models/User.js";
 import userModel from "../models/userModel.js";
 import Wishlist from "../models/Wishlist.js";
 import { sqlFilterHandler } from "../utils/sqlFilterHandler.js";
@@ -98,16 +99,18 @@ export const getCategories = async (req, res) => {
 export const createOrder = async (req, res) => {
   try {
     const { products, productId } = req?.body
-    const userId = req?.user?._id
-    const user = await userModel.findById(userId, 'name email phone address')
+    const userId = req?.user?.id
+    const user = await User.findByPk(userId, { attributes: ['name', 'cno', 'address'] })
 
     if ((!products || products?.length === 0) && productId) {
       const query = sqlProductFetch("p.p_name as title,") + ` and p.id_pack = ${productId} `
       const [data] = await sequelize.query(query)
       req.body.products.push({ ...data[0], quantity: 1 })
     }
+
     let finalPrice = 0
     let totalDiscount = 0
+
     products?.map((p) => {
       const price = p?.dynamic_price * p?.quantity
       const discount = p?.discount * p?.quantity
