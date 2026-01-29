@@ -57,14 +57,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
   updateCurrency()
-});
+// });
 
 //PORT
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8088;
 
 //run listen
 app.listen(PORT, () => {
