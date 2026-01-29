@@ -64,7 +64,7 @@ app.use("/upload", uploadRoutes)
 // });
 
 //PORT
-const PORT = process.env.PORT || 8088;
+const PORT = process.env.PORT || 60000;
 
 //run listen
 app.listen(PORT, () => {
