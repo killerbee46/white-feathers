@@ -56,6 +56,15 @@ app.get("/", (req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
+app.get("/api/update-material-price",async(res,req)=> {
+  const rates = await fetchTodaysGoldSilverRates();
+  updateMaterialPrice(rates)
+  updateCurrency()
+  return res.send({
+    success:true,
+    message:"Updated Material Price"
+  })
+})
 
 // schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
