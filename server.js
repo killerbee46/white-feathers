@@ -14,6 +14,7 @@ import schedule from 'node-schedule';
 import fetchTodaysGoldSilverRates from "./utils/goldRate.js";
 import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
 import { updateCurrency } from "./utils/updateCurrency.js";
+import { startSale, stopSale } from "./utils/silverSaleTimeController.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -56,21 +57,20 @@ app.get("/", (req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
-app.get("/api/update-material-price",async(res,req)=> {
-  const rates = await fetchTodaysGoldSilverRates();
-  updateMaterialPrice(rates)
-  updateCurrency()
-  return res.send({
-    success:true,
-    message:"Updated Material Price"
-  })
-})
 
-// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
   updateCurrency()
-// });
+});
+
+schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
+  startSale()
+});
+
+schedule.scheduleJob({ hour: 6, minute: 0, tz: "Asia/Kathmandu" }, async function () {
+  stopSale()
+});
 
 //PORT
 const PORT = process.env.PORT || 60000;
