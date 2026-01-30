@@ -58,17 +58,17 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api",apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
   updateCurrency()
-});
+// });
 
 schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
   startSale()
 });
 
-schedule.scheduleJob({ hour: 6, minute: 0, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 18, minute: 0, tz: "Asia/Kathmandu" }, async function () {
   stopSale()
 });
 
