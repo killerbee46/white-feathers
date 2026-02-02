@@ -59,11 +59,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", apiRoutes);
 app.use("/upload", uploadRoutes)
 
-schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
   updateCurrency()
-});
+// });
 
 // schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
 //   if (dayjs().day() != 6) {
@@ -76,7 +76,7 @@ schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async funct
 // });
 
 //PORT
-const PORT = process.env.PORT || 60000;
+const PORT = process.env.PORT || 8080;
 
 //run listen
 app.listen(PORT, () => {
