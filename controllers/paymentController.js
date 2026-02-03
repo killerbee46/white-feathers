@@ -54,7 +54,7 @@ export const initializeEsewaPayment = async (req, res) => {
       msg: msg,
       cookie_id: JSON.stringify({ products: products }),
       checkout: 0,
-      mode: 1,
+      mode: 0,
       tracking_code: dayjs().unix(),
       cur_id: 1,
       dispatch: 0,
@@ -94,19 +94,19 @@ export const completeEsewaPayment = async (req, res) => {
     const paymentInfo = await verifyEsewaPayment(data);
 
     // Find the purchased item using the transaction UUID
-    const orderQuery = `UPDATE cart_book
-SET checkout = 1, esewa_code = '${paymentInfo.decodedData.transaction_code}',esewa_verify=1, p_date = ${dayjs().format("YYYY-MM-DD")},
-p_amount = ${paymentInfo.decodedData.total_amount}
-WHERE tracking_code = ${paymentInfo.decodedData.transaction_uuid}`
-    const [orderData] = await sequelize.query(orderQuery)
-    // PurchasedItem.findById(
-    //   paymentInfo.response.transaction_uuid
-    // );
+    const order = await Order.findOne({where:{tracking_code:paymentInfo.decodedData.transaction_uuid}})
 
-
+    await order.update({
+      checkout:1,
+      mode:3,
+      esewa_code:paymentInfo.decodedData.transaction_code,
+      esewa_verify:1,
+      p_date:dayjs().format("YYYY-MM-DD"),
+      p_amount:paymentInfo.decodedData.total_amount
+    })
+    
     // Create a new payment record in the database
-    const paymentData = await Payment.create({
-      pidx: paymentInfo.decodedData.transaction_code,
+    await Payment.create({
       transactionId: paymentInfo.decodedData.transaction_code,
       orderId: paymentInfo.response.transaction_uuid,
       amount: paymentInfo.decodedData.total_amount,

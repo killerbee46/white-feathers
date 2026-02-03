@@ -1,28 +1,36 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
 
-const paymentSchema = new mongoose.Schema(
+const Payment = sequelize.define(
+    "Payment",
     {
-        transactionId: { type: String, unique: true },
-        pidx: { type: String, unique: true },
-        orderId: {
-            type: String,
-            required: true,
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
         },
-        amount: { type: Number, required: true },
-        dataFromVerificationReq: { type: Object },
-        apiQueryFromUser: { type: Object },
+        transactionId: {
+            type: DataTypes.STRING,
+            unique: true
+        },
+        orderId: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        amount: { type: DataTypes.INTEGER, allowNull: false },
         paymentGateway: {
-            type: String,
+            type: DataTypes.STRING,
             enum: ["khalti", "esewa", "cod"],
-            required: true,
         },
         status: {
-            type: String,
+            type: DataTypes.STRING,
             enum: ["success", "pending", "failed"],
-            default: "pending",
+            defaultValue: "pending"
         },
-        paymentDate: { type: Date, default: Date.now },
+        paymentDate: {
+            type: DataTypes.DATEONLY, defaultValue: Date.now()
+        },
     },
-    { timestamps: true }
+    { timestamps: false }
 );
-export default mongoose.model("payment", paymentSchema);
+export default Payment
