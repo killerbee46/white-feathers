@@ -42,4 +42,14 @@ router.use("/notifications", notificationRoutes)
 router.use("/materials", materialRoutes);
 router.use("/metals", metalRoutes);
 
+router.get("/update-material-price",async(res,req)=> {
+  const rates = await fetchTodaysGoldSilverRates();
+  updateMaterialPrice(rates)
+  updateCurrency()
+  return res.send({
+    success:true,
+    message:"Updated Material Price"
+  })
+})
+
 export default router

@@ -14,6 +14,8 @@ import schedule from 'node-schedule';
 import fetchTodaysGoldSilverRates from "./utils/goldRate.js";
 import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
 import { updateCurrency } from "./utils/updateCurrency.js";
+import { startSale, stopSale } from "./utils/silverSaleTimeController.js";
+import dayjs from "dayjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -54,7 +56,7 @@ app.get("/", (req, res) => {
 });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use("/api",apiRoutes);
+app.use("/api", apiRoutes);
 app.use("/upload", uploadRoutes)
 
 schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
@@ -62,6 +64,16 @@ schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async funct
   updateMaterialPrice(rates)
   updateCurrency()
 });
+
+// schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
+//   if (dayjs().day() != 6) {
+//     startSale()
+//   }
+// });
+
+// schedule.scheduleJob({ hour: 18, minute: 0, tz: "Asia/Kathmandu" }, async function () {
+//   stopSale()
+// });
 
 //PORT
 const PORT = process.env.PORT || 8080;
