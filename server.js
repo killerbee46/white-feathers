@@ -65,15 +65,15 @@ schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async funct
   updateCurrency()
 });
 
-// schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
-//   if (dayjs().day() != 6) {
-//     startSale()
-//   }
-// });
+schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
+  if (dayjs().day() != 6) {
+    startSale()
+  }
+});
 
-// schedule.scheduleJob({ hour: 18, minute: 0, tz: "Asia/Kathmandu" }, async function () {
-//   stopSale()
-// });
+schedule.scheduleJob({ hour: 18, minute: 0, tz: "Asia/Kathmandu" }, async function () {
+  stopSale()
+});
 
 //PORT
 const PORT = process.env.PORT || 8080;

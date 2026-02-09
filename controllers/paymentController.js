@@ -67,7 +67,7 @@ export const initializeEsewaPayment = async (req, res) => {
 
     // Initiate payment with eSewa
     const paymentInitiate = await getEsewaPaymentHash({
-      amount: 450,
+      amount: totalFinalPrice,
       transaction_uuid: tId,
     });
 
@@ -76,7 +76,7 @@ export const initializeEsewaPayment = async (req, res) => {
       success: true,
       payment: paymentInitiate,
       id: tId,
-      amount: 450
+      amount: totalFinalPrice
     });
   } catch (error) {
     return res.status(500).json({
