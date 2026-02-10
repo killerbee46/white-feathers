@@ -1,16 +1,17 @@
 import Review from "../models/Review.js";
+import User from "../models/User.js";
 
 export const getTestimonials = async (req, res) => {
     try {
-        const testimonials = await Review.find({ type: "testimonial" })?.populate("userId","name email")
-        const userId = req?.user?._id
+        const testimonials = await Review.findAll({where:{ type: "testimonial" }})
+        const userId = req?.user?.id
         let allowActions = false
         const newTestimonial = testimonials.map((test) => {
             if (userId) {
-                allowActions = test.userId._id == userId
+                allowActions = test.userId == userId
             }
             return {
-                ...test?._doc,
+                ...test?.dataValues,
                 allowActions: allowActions
             }
         })
@@ -32,18 +33,18 @@ export const getTestimonials = async (req, res) => {
 
 export const getMyReviews = async (req, res) => {
     try {
-        const userId = req?.user?._id
-        const testimonials = await Review.find({userId:userId},"review rating createdAt updatedAt")
+        const userId = req?.user?.id
+        const testimonials = await Review.findAll({where:{userId:userId},attributes:["review", "rating", "createdAt", "updatedAt", "productId", "type"]})
         const newTestimonial = testimonials.map((test) => {
             return {
-                ...test?._doc,
+                ...test?.dataValues,
                 allowActions: true
             }
         })
 
         return res.status(200).json({
             status: 'success',
-            message: "Testimonials fetched successfully",
+            message: "Reviews fetched successfully",
             data: newTestimonial
         })
     } catch (error) {
@@ -59,15 +60,19 @@ export const getMyReviews = async (req, res) => {
 export const getProductReview = async (req, res) => {
     try {
         const { productId } = req?.params
-        const testimonials = await Review.find({ type: "product", productId: productId })?.populate("userId","name email")
-        const userId = req?.user?._id
+        const testimonials = await Review.findAll({where:{ type: "product", productId: productId },
+        include:[
+            { model: User, required: true, attributes:["name","email"] }
+        ]
+        })
+        const userId = req?.user?.id
         let allowActions = true
         const newTestimonial = testimonials.map((test) => {
             if (userId) {
                 allowActions = test.userId !== userId
             }
             return {
-                ...test?._doc,
+                ...test?.dataValues,
                 allowActions: allowActions
             }
         })
@@ -91,10 +96,10 @@ export const getProductReview = async (req, res) => {
 export const addReview = async (req, res) => {
     try {
         const { rating, review, productId } = req.body
-        const userId = req?.user?._id
+        const userId = req?.user?.id
         req.body.userId = userId
         const reviewFilter = productId ? { type: "product", productId: productId } : { type: "testimonial" }
-        const myReview = await Review.findOne({ userId: userId, ...reviewFilter }, "")
+        const myReview = await Review.findOne({where:{ userId: userId, ...reviewFilter } , attributes:["id"]})
         //validations
         if (!rating && !review) {
             return res.status(400).send({ error: "Both rating and review are required" });
@@ -109,7 +114,7 @@ export const addReview = async (req, res) => {
             req.body.type = "testimonial"
         }
 
-        const newReview = await new Review(req?.body).save()
+        const newReview = await Review.create(req?.body)
         return res.status(201).json({
             status: 'success',
             message: "Review added successfully!",
@@ -118,7 +123,7 @@ export const addReview = async (req, res) => {
         console.log(error);
         res.status(500).send({
             status: "failed",
-            message: "Error while adding to Cart",
+            message: "Error while adding to Reviews",
             error
         });
     }
@@ -128,8 +133,8 @@ export const updateReview = async (req, res) => {
     try {
         const { id } = req.params;
         const { rating, review } = req?.body
-        const userId = req?.user?._id
-         const myReview = await Review.findById(id, "")
+        const userId = req?.user?.id
+         const myReview = await Review.findByPk(id)
 
         //validations
         if (!myReview) {
@@ -138,10 +143,10 @@ export const updateReview = async (req, res) => {
         if (!rating && !review) {
             return res.status(400).send({ error: "Both rating and review are required" });
         }
-        if (userId !== myReview.userId.toString()) {
+        if (userId !== myReview.userId) {
             return res.send({ error: "You have no permission to edit this review" });
         }
-        const deleted = await Review.findByIdAndUpdate(id,{
+        myReview.update({
             ...req.body
         })
         return res.status(201).json({
@@ -162,17 +167,17 @@ export const updateReview = async (req, res) => {
 export const removeReview = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req?.user?._id
-        const myReview = await Review.findById(id, "")
+        const userId = req?.user?.id
+        const myReview = await Review.findByPk(id,{attributes:['id',"userId"]})
 
         //validations
         if (!myReview) {
             return res.send({ error: "You have no review" });
         }
-        if (userId !== myReview.userId.toString()) {
+        if (userId !== myReview.userId) {
             return res.send({ error: "You have no permission to delete this review" });
         }
-        const deleted = await Review.deleteOne({ _id: id })
+        const deleted = await myReview.destroy()
         return res.status(201).json({
             status: "success",
             message: "Review deleted successfully."

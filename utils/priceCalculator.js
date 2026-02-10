@@ -3,10 +3,6 @@ export const priceCalculator = ({ data, res }) => {
   let totalPrice = 0
   let totalDiscount = 0
 
-  // return res.send({
-  //   data: data
-  // })
-
   data?.map((d) => {
     const materialPrice = parseInt(d?.material?.price)
     const pricePerGram = d?.materialId == 1 ?

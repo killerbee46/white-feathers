@@ -1,35 +1,52 @@
-import mongoose from "mongoose";
+import { sequelize } from "../config/tempDb.js";
+import { DataTypes } from "sequelize";
+import User from "./User.js";
 
-const ReviewSchema = new mongoose.Schema(
+const Review = sequelize.define(
+  "Review",
   {
+    id:{
+      type:DataTypes.INTEGER,
+      primaryKey:true,
+      autoIncrement:true
+    },
     userId: {
-      type: mongoose.ObjectId,
-      ref:"Users",
-      // required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "c_id"
+      }
     },
     productId: {
-      type: String,
-      // ref:"Products",
+      type: DataTypes.INTEGER
     },
     type: {
       type: String,
-      enum:['product', 'testimonial'],
-      required: true,
+      enum: ['product', 'testimonial'],
+      allowNull: false
     },
-    rating:{
-        type:Number,
-        required:true,
+    rating: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
-    review:{
-        type:String,
-        required:true,
+    review: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
-    visible:{
-        type:Boolean,
-        default:true,
+    visible: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
   },
-  { timestamps: true }
+  {
+    tableName: 'testimonials'
+  }
 );
 
-export default mongoose.model("Reviews", ReviewSchema);
+Review.hasOne(User, {
+  foreignKey: "c_id",
+  sourceKey: "userId"
+})
+
+export default Review
