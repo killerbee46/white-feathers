@@ -1,41 +1,34 @@
-export const priceCalculator = (data) => {
+export const priceCalculator = ({ data, res }) => {
 
   let totalPrice = 0
   let totalDiscount = 0
 
+  // return res.send({
+  //   data: data
+  // })
+
   data?.map((d) => {
+    const materialPrice = parseInt(d?.material?.price)
     const pricePerGram = d?.materialId == 1 ?
-      d?.price ?? d?.material?.price :
-      d?.metalId > 0 ? 1 : 0
-    const makingChargePerGram = d?.mk_gm
-    const makingChargePerPiece = d?.mk_pp
-    const jartiPerGram = d?.jarti / 100 * d?.material?.price / 11.664
-    let discount = 0
-    // gold silver
-    if (d?.unit === "gm" || d?.unit === "tola") {
-      pricePerGram = (d?.unit === "gm") ?
-        d?.metalId?.unitPrice / 11.664 :
-        (d?.unit === "tola") ? d?.metalId?.unitPrice : 0
+      d?.price ?? materialPrice :
+      d?.metalId != 10 ? materialPrice * (d?.metal?.purity / 100) / 11.664 : materialPrice / 11.664 * 4
+    const disPerGram = d?.materialId == 1 ?
+      (d?.price ?? materialPrice) * (parseInt(d?.material?.discount) / 100) :
+      d?.metalId != 10 ? materialPrice * (d?.metal?.purity / 100) * (d?.offer ?? 0 / 100) : materialPrice / 11.664 * 0.5
+    const makingChargePerGram = d?.mk_gm ?? 0
+    const makingChargePerPiece = d?.mk_pp ?? 0
+    const jartiPerGram = (d?.jarti ?? 0 / 100 * materialPrice) / 11.664
 
-      makingChargePerGram = (d?.makingUnit === "gm") ?
-        d?.makingCharge : (d?.makingUnit === "percent") ?
-          ((d?.materialId?.unitPrice / 11.664) * (d?.makingCharge / 100)) : 0
-    }
-    else {
-      pricePerGram = (d?.unit === "carat") ?
-        d?.materialId?.unitPrice :
-        d?.materialId?.unitPrice / 100
+    const price = (pricePerGram + makingChargePerGram + jartiPerGram) * d?.weight + makingChargePerPiece
+    const discount = disPerGram * d?.weight ?? 0
 
-      discount = d?.materialId?.discount / 100 * d?.materialId?.unitPrice * d?.weight
-    }
+    totalPrice += price
+    totalDiscount += discount
 
-
-    totalPrice += (pricePerGram + makingChargePerGram + jartiPerGram) * d?.weight + makingChargePerPiece
-    totalDiscount += discount || 0
   })
   return {
-    totalPrice: totalPrice.toFixed(0),
-    totalDiscount: totalDiscount.toFixed(0),
-    finalPrice: (totalPrice - totalDiscount)
+    totalPrice: totalPrice,
+    totalDiscount: totalDiscount,
+    finalPrice: totalPrice - totalDiscount
   }
 }

@@ -25,12 +25,12 @@ export const calculatePrice = async (req, res) => {
       jarti: dat?.jarti,
     }))
 
-    const prices = priceCalculator(dataToOperate)
+    const prices = priceCalculator({data:dataToOperate,res:res})
 
     return res.status(200).json({
       status: 'success',
       message: "Price calculated successfully",
-      data: dataToOperate
+      data: prices
     })
 
   } catch (error) {
