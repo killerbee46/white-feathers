@@ -1,28 +1,48 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/tempDb.js";
+import User from "./User.js";
 
-const notificationSchema = new mongoose.Schema(
+const Notification = sequelize.define(
+    "Notification",
     {
+        id:{
+            type:DataTypes.INTEGER,
+            primaryKey:true,
+            autoIncrement:true
+        },
         title: {
-            type: String,
-            required:true
+            type: DataTypes.STRING,
+            allowNull: false
         },
         description: {
-            type: String,
-            required:true
+            type: DataTypes.STRING,
+            allowNull: false
         },
-        to:{
-            type:String,
-            enum:["user", "employee", "both"],
-            default:"user"
+        to: {
+            type: DataTypes.STRING,
+            enum: ["user", "employee", "both"],
+            defaultValue: "user"
         },
         opened: {
-            type: [mongoose.ObjectId],
+            type: DataTypes.TEXT,
         },
-        createdBy:{
-            type:mongoose.ObjectId
-        }
+        createdBy: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: User,
+                key: "c_id"
+            }
+        },
     },
-    { timestamps: true }
+    {
+        timestamps: false
+    }
 );
 
-export default mongoose.model("Notification", notificationSchema);
+Notification.hasOne(User, {
+  foreignKey: "c_id",
+  sourceKey: "createdBy"
+})
+
+export default Notification
