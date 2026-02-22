@@ -14,6 +14,9 @@ import notificationRoutes from "./notificationRoutes.js";
 import { calculatePrice } from "../controllers/priceCalculatorController.js";
 import materialRoutes from "./materialRoutes.js";
 import metalRoutes from "./metalRoutes.js";
+import { updateMaterialPrice } from "../utils/updateMaterialPrice.js";
+import fetchTodaysGoldSilverRates from "../utils/goldRate.js";
+import { updateCurrency } from "../utils/updateCurrency.js";
 
 const router = express.Router();
 
@@ -40,7 +43,7 @@ router.use("/notifications", notificationRoutes)
 router.use("/materials", materialRoutes);
 router.use("/metals", metalRoutes);
 
-router.get("/update-material-price",async(res,req)=> {
+router.get("/update-material-price",async(req,res)=> {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
   updateCurrency()

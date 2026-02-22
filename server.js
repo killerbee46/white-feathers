@@ -52,18 +52,22 @@ app.use('/uploads', express.static('uploads'))
 
 //rest api
 app.get("/", (req, res) => {
-  res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>`)
+  res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>
+    <div>
+    <a href="/api/update-material-price"><button>Update Price</button></a>
+    </div>
+    `)
 });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", apiRoutes);
 app.use("/upload", uploadRoutes)
 
-// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
   updateMaterialPrice(rates)
   updateCurrency()
-// });
+});
 
 schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
   if (dayjs().day() != 6) {
