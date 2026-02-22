@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/tempDb.js";
 import Product from "./Product.js";
-import PackageSlider from "./PackageSlider.js";
 
 const CartDetails = sequelize.define(
     "CartDetails",

@@ -1,5 +1,4 @@
 import Currency from "../models/Currency.js";
-import { sequelize } from "../config/tempDb.js";
 
 export const createCurrency = async (req, res) => {
   try {

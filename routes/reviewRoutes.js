@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/testimonials", checkForSignIn, getTestimonials);
 router.get("/me", requireSignIn, getMyReviews);
-router.get("/product-review/:productId", checkForSignIn, getProductReview);
+router.get("/product/:productId", checkForSignIn, getProductReview);
 router.post("/",requireSignIn, addReview);
 router.patch("/:id",requireSignIn, updateReview);
 router.delete("/:id",requireSignIn, removeReview);
