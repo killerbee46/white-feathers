@@ -29,7 +29,8 @@ app.use('/uploads', express.static('uploads'))
 
 //rest api
 app.get("/", (req, res) => {
-  res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>`)
+  res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>
+    <div style="margin-top:20px;"><a href="/api/update-material-price"><button>Refresh Material Prices</button></a></div>`)
 });
 
 app.use("/api", apiRoutes);

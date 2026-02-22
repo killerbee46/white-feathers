@@ -13,6 +13,9 @@ import notificationRoutes from "./notificationRoutes.js";
 import { calculatePrice } from "../controllers/priceCalculatorController.js";
 import materialRoutes from "./materialRoutes.js";
 import metalRoutes from "./metalRoutes.js";
+import fetchTodaysGoldSilverRates from "../utils/goldRate.js";
+import { updateMaterialPrice } from "../utils/updateMaterialPrice.js";
+import { updateCurrency } from "../utils/updateCurrency.js";
 
 const router = express.Router();
 
