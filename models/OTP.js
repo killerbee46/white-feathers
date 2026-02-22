@@ -22,7 +22,10 @@ const OTP = sequelize.define(
       allowNull:false
     }
   },
-  { timestamps: false }
+  { 
+    timestamps: false ,
+    tableName:"otps"
+  }
 );
 
 export default OTP

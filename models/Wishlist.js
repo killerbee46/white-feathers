@@ -17,7 +17,8 @@ const Wishlist = sequelize.define(
     }
   },
   { 
-    timestamps: false 
+    timestamps: false ,
+    tableName:"wishlists"
   }
 );
 

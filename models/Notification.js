@@ -35,9 +35,10 @@ const Notification = sequelize.define(
             }
         },
     },
-    {
-        timestamps: false
-    }
+    { 
+    timestamps: false ,
+    tableName:"notifications"
+  }
 );
 
 Notification.hasOne(User, {

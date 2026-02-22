@@ -31,6 +31,9 @@ const Payment = sequelize.define(
             type: DataTypes.DATEONLY, defaultValue: Date.now()
         },
     },
-    { timestamps: false }
+    { 
+    timestamps: false ,
+    tableName:"payments"
+  }
 );
 export default Payment

@@ -1,13 +1,13 @@
 import { DataTypes } from "sequelize";
-import {sequelize} from "../config/tempDb.js"
+import { sequelize } from "../config/tempDb.js"
 
 const Currency = sequelize.define(
-"Currency",
+  "Currency",
   {
-    cur_id:{
-      type:DataTypes.INTEGER,
-      primaryKey:true,
-      autoIncrement:true
+    cur_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
     },
     cur_name: {
       type: DataTypes.STRING
@@ -19,9 +19,9 @@ const Currency = sequelize.define(
       type: DataTypes.STRING,
     },
   },
-  { 
+  {
     timestamps: false,
-  tableName:'currency'
+    tableName: 'currency'
   }
 );
 
