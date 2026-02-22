@@ -105,26 +105,27 @@ export const deleteCurrency = async (req, res) => {
 //upate producta
 export const updateCurrency = async (req, res) => {
   try {
-    const { cur_name, cur_rate } =
-      req.body;
-    //alidation
+    const { cur_name, cur_rate } = req.body;
+    
+    //validation
 
-    if (!cur_rate || !cur_name) return res.status(400).send({ error: "Atleast one data is Required" });
-
+    if (!(cur_rate || cur_name)) return res.status(400).send({ error: "Atleast one data is Required" });
 
     const currency = await Currency.findByPk(req.params.id)
+    const currExists = await Currency.findOne({where:{cur_name:cur_name}})
+    
     if (!currency) {
       return res.status(400)?.json({ error: "Currency does not exists" })
     }
 
-    if (currency && req.params.id != currency?.cur_id) {
+    if (currExists && cur_name?.toLowerCase() === currExists?.cur_name.toLowerCase()&& req.params.id != currency?.cur_id) {
       return res?.status(409).json({ error: "Currency already exists!" })
     }
 
-    await Currency.findByIdAndUpdate(
+    await currency.update(
       { ...req.body }
     );
-    await currency.save();
+    
     return res.status(201).send({
       status: "success",
       message: "Currency Updated Successfully",
