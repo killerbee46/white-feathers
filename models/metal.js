@@ -24,6 +24,7 @@ const Metal = sequelize.define(
     tableName: 'package_metal',
     timestamps: false
   }
+  
 )
 
-export default Metal
+export default Metal 

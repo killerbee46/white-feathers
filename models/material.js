@@ -24,6 +24,7 @@ const Material = sequelize.define(
     tableName: 'package_material',
     timestamps: false
   }
+  
 )
 
 export default Material
