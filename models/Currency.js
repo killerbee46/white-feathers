@@ -1,21 +1,28 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import {sequelize} from "../config/tempDb.js"
 
-const CurrencySchema = new mongoose.Schema(
+const Currency = sequelize.define(
+"Currency",
   {
-    name: {
-      type: String,
-      required: true,
+    cur_id:{
+      type:DataTypes.INTEGER,
+      primaryKey:true,
+      autoIncrement:true
     },
-    slug: {
-      type: String,
-      required: true,
+    cur_name: {
+      type: DataTypes.STRING
     },
-    rate: {
-      type: Number,
-      required: true,
-    }
+    cur_rate: {
+      type: DataTypes.INTEGER
+    },
+    last_updated_at: {
+      type: DataTypes.STRING,
+    },
   },
-  { timestamps: true }
+  { 
+    timestamps: false,
+  tableName:'currency'
+  }
 );
 
-export default mongoose.model("Currency", CurrencySchema);
+export default Currency;

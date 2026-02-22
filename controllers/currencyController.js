@@ -1,30 +1,26 @@
-import dayjs from "dayjs";
 import Currency from "../models/Currency.js";
-import axios from "axios";
 import { sequelize } from "../config/tempDb.js";
 
 export const createCurrency = async (req, res) => {
   try {
-    const { name, slug, rate } =
+    const { cur_name,cur_rate } =
       req.body;
     //alidation
     switch (true) {
-      case !name:
+      case !cur_name:
         return res.status(400).send({ error: "Name is Required" });
-      case !slug:
-        return res.status(400).send({ error: "Slug is Required" });
-      case !rate:
+      case !cur_rate:
         return res.status(400).send({ error: "Rate is Required" });
     }
 
-    const currExists = await Currency.findOne({ slug })
+    const currExists = await Currency.findOne({where:{ cur_name:cur_name }})
 
     if (currExists) {
-      return res?.status(409).json({ error: "Slug of currency must be unique" })
+      return res?.status(409).json({ error: "Name of currency must be unique" })
     }
 
-    const currency = new Currency({ ...req.body });
-    await currency.save();
+    const currency = await Currency.create({ ...req.body });
+    
     res.status(201).send({
       status: "success",
       message: "Currency added Successfully"
@@ -42,8 +38,7 @@ export const createCurrency = async (req, res) => {
 //get all products
 export const getCurrencies = async (req, res) => {
   try {
-    const products = await Currency.find({})
-    const metalsApi = "https://api.metalpriceapi.com/v1/latest?api_key=4e8fddec48803e9b96414a1d27450d14&base=NPR&currencies=EUR,AUD,USD,CAD,XAU,XAG"
+    const products = await Currency.findAll({})
 
     return res.status(200).send({
       status: "success",
@@ -59,40 +54,23 @@ export const getCurrencies = async (req, res) => {
     });
   }
 };
-export const getCurrenciesSql = async (req, res) => {
+
+// get single product
+export const getCurrency = async (req, res) => {
   try {
-    const currencyQuery = "select * from currency"
-    const [currency] = await sequelize.query(currencyQuery)
+    const currency = await Currency
+      .findByPk(req?.params?.id)
 
     return res.status(200).send({
       status: "success",
-      message: "All Currencies ",
-      currency,
+      message: "Currency Detail Fetched",
+      data:currency,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       status: "failed",
-      message: "Erorr in getting currencies",
-      error: error.message,
-    });
-  }
-};
-// get single product
-export const getProduct = async (req, res) => {
-  try {
-    const product = await Product
-      .findById(req?.params?.id)
-    res.status(200).send({
-      status: "success",
-      message: "Single Product Fetched",
-      product,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      status: "failed",
-      message: "Eror while getitng single product",
+      message: "Error while getting single product",
       error,
     });
   }
@@ -103,10 +81,13 @@ export const getProduct = async (req, res) => {
 //delete 
 export const deleteCurrency = async (req, res) => {
   try {
-    const deleted = await Currency.findByIdAndDelete(req.params.id).select("-photo");
-    if (!deleted) {
+    const currency = await Currency.findByPk(req.params.id)
+    if (!currency) {
       return res.status(400)?.json({ error: "Currency does not exists" })
     }
+
+    await currency.destroy()
+
     return res.status(200).send({
       status: "success",
       message: "Currency Deleted successfully",
@@ -124,23 +105,24 @@ export const deleteCurrency = async (req, res) => {
 //upate producta
 export const updateCurrency = async (req, res) => {
   try {
-    const { name, slug, rate } =
+    const { cur_name, cur_rate } =
       req.body;
     //alidation
 
-    if (!rate || !slug || !name) return res.status(400).send({ error: "Atleast one data is Required" });
+    if (!cur_rate || !cur_name) return res.status(400).send({ error: "Atleast one data is Required" });
 
 
-    const currExists = await Currency.findOne({ slug }, "")
-
-    if (currExists && req.params.id != currExists?._id) {
-      return res?.status(409).json({ error: "Slug of currency must be unique" })
+    const currency = await Currency.findByPk(req.params.id)
+    if (!currency) {
+      return res.status(400)?.json({ error: "Currency does not exists" })
     }
 
-    const currency = await Currency.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body },
-      { new: true }
+    if (currency && req.params.id != currency?.cur_id) {
+      return res?.status(409).json({ error: "Currency already exists!" })
+    }
+
+    await Currency.findByIdAndUpdate(
+      { ...req.body }
     );
     await currency.save();
     return res.status(201).send({
