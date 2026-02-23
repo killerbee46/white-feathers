@@ -5,7 +5,7 @@ import * as cheerio from "cheerio";
  * Fetch today's gold & silver rates per tola from FENEGOSIDA
  */
 export async function fetchTodaysGoldSilverRates() {
-  const url = "https://www.fenegosida.org/rate-history.php";
+  const url = "https://fenegosida.org/rate-history.php";
 
   try {
     const { data: html } = await axios.get(url);
