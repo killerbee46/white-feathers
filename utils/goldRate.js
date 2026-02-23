@@ -31,7 +31,7 @@ export async function fetchTodaysGoldSilverRates() {
     };
   } catch (err) {
     console.error("Error fetching rates:", err.message);
-    return { error: "Failed to fetch data" };
+    return { error: err.message };
   }
 }
 export default fetchTodaysGoldSilverRates
