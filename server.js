@@ -74,7 +74,7 @@ schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async funct
     startSale()
   }
 });
-schedule.scheduleJob({ date: 25,hour: 12, minute: 34, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ date: 25,hour: 0, minute: 35, tz: "Asia/Kathmandu" }, async function () {
     startHoliSale()
 });
 
