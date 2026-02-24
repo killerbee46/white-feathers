@@ -14,7 +14,7 @@ import schedule from 'node-schedule';
 import fetchTodaysGoldSilverRates from "./utils/goldRate.js";
 import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
 import { updateCurrency } from "./utils/updateCurrency.js";
-import { startSale, stopSale } from "./utils/silverSaleTimeController.js";
+import { startHoliSale, startSale, stopSale } from "./utils/silverSaleTimeController.js";
 import dayjs from "dayjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,6 +74,9 @@ schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async funct
   if (dayjs().day() != 6) {
     startSale()
   }
+});
+schedule.scheduleJob({ hour: 8, minute: 30, tz: "Asia/Kathmandu" }, async function () {
+    startHoliSale()
 });
 
 schedule.scheduleJob({ hour: 18, minute: 0, tz: "Asia/Kathmandu" }, async function () {
