@@ -63,19 +63,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", apiRoutes);
 app.use("/upload", uploadRoutes)
 
-// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
   const rates = await fetchTodaysGoldSilverRates();
-  console.log(rates, "gold and silver rates")
-  // updateMaterialPrice(rates)
-  // updateCurrency()
-// });
+  updateMaterialPrice(rates)
+  updateCurrency()
+});
 
 schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
   if (dayjs().day() != 6) {
     startSale()
   }
 });
-schedule.scheduleJob({ hour: 8, minute: 30, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ date: 25,hour: 12, minute: 34, tz: "Asia/Kathmandu" }, async function () {
     startHoliSale()
 });
 
