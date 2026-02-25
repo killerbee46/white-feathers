@@ -16,6 +16,7 @@ import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
 import { updateCurrency } from "./utils/updateCurrency.js";
 import { startHoliSale, startSale, stopSale } from "./utils/silverSaleTimeController.js";
 import dayjs from "dayjs";
+import { apiPriceUpdate } from "./utils/apiPriceUpdate.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -64,8 +65,9 @@ app.use("/api", apiRoutes);
 app.use("/upload", uploadRoutes)
 
 schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
-  const rates = await fetchTodaysGoldSilverRates();
-  updateMaterialPrice(rates)
+  // const rates = await fetchTodaysGoldSilverRates();
+  // updateMaterialPrice(rates)
+  apiPriceUpdate()
   updateCurrency()
 });
 
