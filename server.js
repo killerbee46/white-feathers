@@ -9,8 +9,26 @@ import schedule from 'node-schedule';
 import fetchTodaysGoldSilverRates from "./utils/goldRate.js";
 import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
 import { updateCurrency } from "./utils/updateCurrency.js";
-import { startSale, stopSale } from "./utils/silverSaleTimeController.js";
+import { startHoliSale, startSale, stopSale } from "./utils/silverSaleTimeController.js";
 import dayjs from "dayjs";
+import { apiPriceUpdate } from "./utils/apiPriceUpdate.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: "Express API for White Feather's Jewellery",
+    version: '1.0.0',
+  },
+};
+
+const options = {
+  swaggerDefinition,
+  apis: ['routes/*.js'],
+};
+
+const swaggerSpec = swaggerJSDoc(options);
 
 //configure env
 dotenv.config();
@@ -30,27 +48,28 @@ app.use('/uploads', express.static('uploads'))
 //rest api
 app.get("/", (req, res) => {
   res.send(`<h3>Api server is running</h3> <a href="/api"><button>Go to Api</button></a>
-    <div style="margin-top:20px;"><a href="/api/update-material-price"><button>Refresh Material Prices</button></a></div>`)
+    <div>
+    <a href="/api/update-material-price"><button>Update Price</button></a>
+    </div>
+    `)
 });
 
 app.use("/api", apiRoutes);
 app.use("/upload", uploadRoutes)
 
-// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
-  const rates = await fetchTodaysGoldSilverRates();
-  console.log(rates, "gold and silver rates")
-//   return 
-//   updateMaterialPrice(rates)
-//   updateCurrency()
-// });
-
+schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+  // const rates = await fetchTodaysGoldSilverRates();
+  // updateMaterialPrice(rates)
+  apiPriceUpdate()
+  updateCurrency()
+});
 schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
   if (dayjs().day() != 6) {
     startSale()
   }
 });
 
-schedule.scheduleJob({ hour: 18, minute: 0, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 17, minute: 30, tz: "Asia/Kathmandu" }, async function () {
   stopSale()
 });
 
