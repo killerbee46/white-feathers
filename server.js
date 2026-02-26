@@ -11,21 +11,6 @@ import { startSale, stopSale } from "./utils/silverSaleTimeController.js";
 import dayjs from "dayjs";
 import { apiPriceUpdate } from "./utils/apiPriceUpdate.js";
 
-const swaggerDefinition = {
-  openapi: '3.0.0',
-  info: {
-    title: "Express API for White Feather's Jewellery",
-    version: '1.0.0',
-  },
-};
-
-const options = {
-  swaggerDefinition,
-  apis: ['routes/*.js'],
-};
-
-const swaggerSpec = swaggerJSDoc(options);
-
 //configure env
 dotenv.config();
 
