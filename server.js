@@ -6,14 +6,10 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import cors from "cors";
 import { tempDbConnect } from "./config/tempDb.js";
 import schedule from 'node-schedule';
-import fetchTodaysGoldSilverRates from "./utils/goldRate.js";
-import { updateMaterialPrice } from "./utils/updateMaterialPrice.js";
 import { updateCurrency } from "./utils/updateCurrency.js";
-import { startHoliSale, startSale, stopSale } from "./utils/silverSaleTimeController.js";
+import { startSale, stopSale } from "./utils/silverSaleTimeController.js";
 import dayjs from "dayjs";
 import { apiPriceUpdate } from "./utils/apiPriceUpdate.js";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const swaggerDefinition = {
   openapi: '3.0.0',
