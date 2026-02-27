@@ -16,6 +16,9 @@ const Material = sequelize.define(
     price:{
       type: DataTypes.BIGINT
     },
+    lux_tax:{
+      type: DataTypes.INTEGER
+    },
     discount:{
       type: DataTypes.STRING
     }

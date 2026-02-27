@@ -1,4 +1,4 @@
-const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, details = false,carts,wishes }) => {
+const productPrice = ({ productData, goldPrice,gold_tax=0, silverPrice, diamondPrice, details = false,carts,wishes }) => {
 
     const metal = productData?.Metal
 
@@ -8,7 +8,7 @@ const productPrice = ({ productData, goldPrice, silverPrice, diamondPrice, detai
     const totalDiamondPrice = (productData?.p_name.toLowerCase()?.includes('solitaire') ? productData?.dc_rate : diamondPrice.price) * productData?.dc_qty + (productData?.dc_rate_bce2 * productData?.dc_qty_bce2)
 
     const actualPrice = productData?.isFixedPrice > 0 ? productData?.fixed_price :
-        (metalPrice + rhodiumPrice + makingCharges + totalDiamondPrice)
+        (metalPrice + makingCharges + ((productData?.pmt_id > 0 && productData?.pmt_id < 10 ? gold_tax : 0) / 100 * (metalPrice + makingCharges)) + rhodiumPrice + totalDiamondPrice)
 
     const discount = productData?.isFixedPrice > 0 ? productData?.offer / 100 * actualPrice : (metalPrice + makingCharges) * (productData?.offer / 100) + (productData?.pmt_id == 11 ? 0.5 * silverPrice * productData?.weight / 11.664 : 0) + (diamondPrice?.discount / 100 * totalDiamondPrice)
 

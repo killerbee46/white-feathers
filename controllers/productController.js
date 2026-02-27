@@ -132,7 +132,7 @@ export const getProduct = async (req, res) => {
       existingCart = JSON.parse(cart?.products || "[]")?.map((c) => c?.id)
     }
 
-    const goldPrice = await Material.findByPk(2, { attributes: ["price"] })
+    const goldPrice = await Material.findByPk(2, { attributes: ["price","lux_tax"] })
     const silverPrice = await Material.findByPk(3, { attributes: ["price"] })
     const diamondPrice = await Material.findByPk(1, { attributes: ["price", "discount"] })
     const temp = await Product.findByPk(req?.params?.id, {
@@ -146,7 +146,7 @@ export const getProduct = async (req, res) => {
       ]
     })
 
-    const productDetails = productPrice({ productData: temp, goldPrice: goldPrice?.price, silverPrice: silverPrice?.price, diamondPrice: diamondPrice, details: true,wishes:existingWishlist,carts:existingCart })
+    const productDetails = productPrice({ productData: temp, goldPrice: goldPrice?.price,gold_tax:goldPrice?.lux_tax, silverPrice: silverPrice?.price, diamondPrice: diamondPrice, details: true,wishes:existingWishlist,carts:existingCart })
 
     res.status(200).send({
       success: true,
