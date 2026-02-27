@@ -42,8 +42,9 @@ router.use("/materials", materialRoutes);
 router.use("/metals", metalRoutes);
 
 router.get("/update-material-price",async(req,res)=> {
-  const rates = await fetchTodaysGoldSilverRates();
-  updateMaterialPrice(rates)
+  // const rates = await fetchTodaysGoldSilverRates();
+  // updateMaterialPrice(rates)
+  apiPriceUpdate()
   updateCurrency()
   return res.send({
     success:true,
