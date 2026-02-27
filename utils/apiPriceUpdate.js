@@ -12,7 +12,12 @@ export const apiPriceUpdate = async() => {
 
     rates?.map(async(r) => {
         let updateRateQuery = ""
-        switch (r?.metal?.id) {
+
+        const date = dayjs(r?.date).format("YYYY-MM-DD")
+        const today = dayjs().format("YYYY-MM-DD")
+
+        if (date == today) {
+          switch (r?.metal?.id) {
           case 1:
             updateRateQuery = `update package_material set price = ${r?.price_per_tola}, last_updated_at = '${dayjs()}' where pm_id = 2`
             sequelize.query(updateRateQuery)
@@ -25,6 +30,7 @@ export const apiPriceUpdate = async() => {
             break
           default:
             break;
+        }
         }
       });
 }
