@@ -91,6 +91,9 @@ const Product = sequelize.define(
     jarti: {
       type: DataTypes.INTEGER
     },
+    jarti_gm: {
+      type: DataTypes.INTEGER
+    },
     dc_rate_b2b: {
       type: DataTypes.INTEGER
     },
