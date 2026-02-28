@@ -23,7 +23,7 @@ const productPrice = ({ productData, goldPrice,gold_tax=0, silverPrice, diamondP
             title: productData?.p_name,
             actualPrice: actualPrice,
             discount: discount,
-            finalPrice: finalPrice,
+            finalPrice: gold_tax,
             ps_id: productData?.ps_id,
             metal: productData?.Metal,
             tag_kid: productData?.tag_kid,
