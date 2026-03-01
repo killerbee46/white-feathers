@@ -1,7 +1,7 @@
 import { sequelize } from "../config/tempDb.js";
 import Material from "../models/Material.js";
 import Metal from "../models/Metal.js";
-import { priceCalculator } from "../utils/priceCalculator.js"
+import priceCalculator from "../utils/priceCalculator.js"
 
 export const calculatePrice = async (req, res) => {
   try {
@@ -13,24 +13,40 @@ export const calculatePrice = async (req, res) => {
     const materials = await Material.findAll({ where: { pm_id: materialIds } })
     const metals = await Metal.findAll({ where: { pmt_id: metalIds } })
 
-    const dataToOperate = tempMat?.map((dat) => ({
-      materialId:dat?.materialId,
-      metalId:dat?.metalId,
-      material: materials?.find((mat) => mat?.pm_id == dat?.materialId),
-      metal: metals?.find((met) => met?.pmt_id == dat?.metalId),
-      price: dat?.price,
-      weight: dat?.weight,
-      mk_pp: dat?.mk_pp,
-      mk_gm: dat?.mk_gm,
-      jarti: dat?.jarti,
-    }))
+    let actualPrice = 0
+    let discount = 0
+    let finalPrice = 0
 
-    const prices = priceCalculator({data:dataToOperate,res:res})
+    const hello = tempMat?.map((dat) => {
+      const dataToOperate = {
+        materialId: dat?.materialId,
+        metalId: dat?.metalId,
+        material: materials?.find((mat) => mat?.pm_id == dat?.materialId)?.dataValues,
+        metal: metals?.find((met) => met?.pmt_id == dat?.metalId)?.dataValues,
+        price: dat?.price,
+        weight: dat?.weight,
+        mk_pp: dat?.mk_pp,
+        mk_gm: dat?.mk_gm,
+        jarti: dat?.jarti,
+        jarti_gm: dat?.jarti_gm
+
+      }
+      const prices = priceCalculator({ productData: dataToOperate })
+
+      actualPrice += prices?.actualPrice
+      discount += prices?.discount
+      finalPrice += prices?.finalPrice
+    })
+
 
     return res.status(200).json({
       status: 'success',
       message: "Price calculated successfully",
-      data: prices
+      data: {
+        actualPrice: actualPrice,
+        discount: discount,
+        finalPrice: finalPrice
+      }
     })
 
   } catch (error) {
