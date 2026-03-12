@@ -38,13 +38,12 @@ app.get("/", (req, res) => {
 app.use("/api", apiRoutes);
 app.use("/upload", uploadRoutes)
 
-// schedule.scheduleJob({ hour: 11, minute: 11, tz: "Asia/Kathmandu" }, async function () {
+schedule.scheduleJob({ hour: 11, minute: 28, tz: "Asia/Kathmandu" }, async function () {
   // const rates = await fetchTodaysGoldSilverRates();
   // updateMaterialPrice(rates)
-  const rates = await apiPriceUpdate();
-console.log(rates);
-  // updateCurrency()
-// });
+  apiPriceUpdate()
+  updateCurrency()
+});
 schedule.scheduleJob({ hour: 11, minute: 30, tz: "Asia/Kathmandu" }, async function () {
   if (dayjs().day() != 6) {
     startSale()
